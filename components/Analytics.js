@@ -1,40 +1,42 @@
 import { useMemo } from 'react'
-import { programMetrics, pct, presencaRate, autoRiskLevel, DONE_SPRINTS } from '../lib/metrics'
+import { programMetrics, pct, presencaRate, autoRiskLevel } from '../lib/metrics'
 import { ini } from '../lib/helpers'
 
-const card = { background: 'var(--white)', border: '1px solid var(--gray-6)', borderRadius: 10, padding: '16px 18px', boxShadow: '0 1px 3px rgba(0,0,0,.06)' }
-const sTitle = { fontSize: 10, fontWeight: 500, color: 'var(--gray-4)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 12 }
+const card = { background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px' }
+const sTitle = { fontSize: 9, fontWeight: 700, color: 'var(--txt-3)', textTransform: 'uppercase', letterSpacing: '.12em', marginBottom: 14, fontFamily: 'var(--font-m)' }
 
-function Bar({ value, max, color = 'var(--orange)', height = 6 }) {
+function Bar({ value, max, color, height = 6 }) {
   const w = max > 0 ? Math.round((value / max) * 100) : 0
   return (
-    <div style={{ background: 'var(--gray-6)', borderRadius: 3, height, overflow: 'hidden', flex: 1 }}>
-      <div style={{ width: `${w}%`, height: '100%', background: color, borderRadius: 3, transition: 'width .4s ease' }} />
+    <div style={{ background: 'var(--bg-4)', borderRadius: 2, height, overflow: 'hidden', flex: 1 }}>
+      <div style={{ width: `${w}%`, height: '100%', background: color, borderRadius: 2, transition: 'width .5s ease', boxShadow: `0 0 6px ${color}66` }} />
     </div>
   )
 }
 
+function presColor(p) { return p >= 70 ? 'var(--green)' : p >= 45 ? 'var(--amber)' : 'var(--red)' }
+
 function RiskDist({ riskMap, total }) {
-  const order = [
-    { key: 'critico',  label: 'Crítico',  color: 'var(--red)'    },
-    { key: 'risco',    label: 'Risco',    color: 'var(--amber)'  },
-    { key: 'atencao',  label: 'Atenção',  color: '#D97706'       },
-    { key: 'ok',       label: 'Ok',       color: 'var(--gray-4)' },
-    { key: 'engajado', label: 'Engajado', color: 'var(--green)'  },
+  const rows = [
+    { key: 'critico',  label: 'CRÍTICO',  color: 'var(--red)'     },
+    { key: 'risco',    label: 'RISCO',    color: 'var(--magenta)' },
+    { key: 'atencao',  label: 'ATENÇÃO',  color: 'var(--amber)'   },
+    { key: 'ok',       label: 'OK',       color: 'var(--txt-3)'   },
+    { key: 'engajado', label: 'ENGAJADO', color: 'var(--green)'   },
   ]
   return (
     <div style={card}>
-      <div style={sTitle}>Distribuição de engajamento</div>
+      <div style={sTitle}>distribuição de engajamento</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {order.map(({ key, label, color }) => {
+        {rows.map(({ key, label, color }) => {
           const count = riskMap[key] || 0
           const w = total > 0 ? Math.round((count / total) * 100) : 0
           return (
-            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ width: 68, fontSize: 11, color, fontWeight: 500, flexShrink: 0 }}>{label}</div>
-              <Bar value={count} max={total} color={color} height={8} />
-              <div style={{ width: 34, textAlign: 'right', fontSize: 11, color: 'var(--gray-3)', fontFamily: 'var(--font-m)', flexShrink: 0 }}>{w}%</div>
-              <div style={{ width: 26, textAlign: 'right', fontSize: 11, color: 'var(--gray-4)', fontFamily: 'var(--font-m)', flexShrink: 0 }}>{count}</div>
+            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 64, fontSize: 9, color, fontWeight: 700, flexShrink: 0, fontFamily: 'var(--font-m)', letterSpacing: '.08em' }}>{label}</div>
+              <Bar value={count} max={total} color={color} height={7} />
+              <div style={{ width: 32, textAlign: 'right', fontSize: 10, color: 'var(--txt-2)', fontFamily: 'var(--font-m)', flexShrink: 0 }}>{w}%</div>
+              <div style={{ width: 24, textAlign: 'right', fontSize: 10, color: 'var(--txt-3)', fontFamily: 'var(--font-m)', flexShrink: 0 }}>{count}</div>
             </div>
           )
         })}
@@ -46,24 +48,28 @@ function RiskDist({ riskMap, total }) {
 function GTCard({ byGT }) {
   return (
     <div style={card}>
-      <div style={sTitle}>Comparativo por grupo</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {Object.entries(byGT).map(([gt, data]) => (
-          <div key={gt}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <div>
-                <span style={{ fontSize: 13, fontWeight: 600 }}>{gt}</span>
-                <span style={{ fontSize: 10, color: 'var(--gray-4)', marginLeft: 6 }}>Mentor: {data.mentor}</span>
+      <div style={sTitle}>comparativo por grupo</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {Object.entries(byGT).map(([gt, data]) => {
+          const p = pct(data.avgPresenca)
+          const col = presColor(p)
+          return (
+            <div key={gt}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--orange)', fontFamily: 'var(--font-m)' }}>{gt}</span>
+                  <span style={{ fontSize: 9, color: 'var(--txt-3)', fontFamily: 'var(--font-m)' }}>{data.mentor}</span>
+                </div>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <span style={{ fontSize: 9, color: 'var(--green)', fontFamily: 'var(--font-m)' }}>{data.engajados} ✓</span>
+                  <span style={{ fontSize: 9, color: 'var(--red)', fontFamily: 'var(--font-m)' }}>{data.criticos} ✕</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-m)', color: col, textShadow: `0 0 10px ${col}` }}>{p}%</span>
+                </div>
               </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <span style={{ fontSize: 10, color: 'var(--green)', fontFamily: 'var(--font-m)' }}>{data.engajados} ✓</span>
-                <span style={{ fontSize: 10, color: 'var(--red)', fontFamily: 'var(--font-m)' }}>{data.criticos} ✕</span>
-                <span style={{ fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-m)', color: pct(data.avgPresenca)>=70?'var(--green)':pct(data.avgPresenca)>=45?'var(--amber)':'var(--red)' }}>{pct(data.avgPresenca)}%</span>
-              </div>
+              <Bar value={p} max={100} color={col} height={6} />
             </div>
-            <Bar value={pct(data.avgPresenca)} max={100} color={pct(data.avgPresenca)>=70?'var(--green)':pct(data.avgPresenca)>=45?'var(--amber)':'var(--red)'} height={7} />
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
@@ -71,21 +77,22 @@ function GTCard({ byGT }) {
 
 function TopList({ title, startups, type, onSelect }) {
   const color = type === 'top' ? 'var(--green)' : 'var(--red)'
+  const magColor = type === 'top' ? 'var(--green-dim)' : 'var(--red-dim)'
   return (
     <div style={card}>
       <div style={sTitle}>{title}</div>
       {startups.map((s, i) => {
         const rate = pct(presencaRate(s))
         return (
-          <div key={s.startup_id} onClick={() => onSelect(s)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 0', borderBottom: '0.5px solid var(--gray-6)', cursor: 'pointer' }}>
-            <div style={{ width: 18, fontSize: 10, color: 'var(--gray-4)', fontFamily: 'var(--font-m)', flexShrink: 0 }}>{i + 1}</div>
-            <div style={{ width: 28, height: 28, borderRadius: '50%', background: type==='top'?'var(--green-soft)':'var(--red-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color, flexShrink: 0 }}>{ini(s.nome)}</div>
+          <div key={s.startup_id} onClick={() => onSelect(s)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 0', borderBottom: `1px solid var(--border)`, cursor: 'pointer', transition: 'opacity .15s' }}>
+            <div style={{ width: 18, fontSize: 9, color: 'var(--txt-3)', fontFamily: 'var(--font-m)', flexShrink: 0 }}>{String(i+1).padStart(2,'0')}</div>
+            <div style={{ width: 28, height: 28, borderRadius: 6, background: magColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color, flexShrink: 0, fontFamily: 'var(--font-m)', border: `1px solid ${color}44` }}>{ini(s.nome)}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 11, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.nome}</div>
-              <div style={{ fontSize: 9, color: 'var(--gray-4)' }}>{s.nome_gt} · {s.escritorio_regional}</div>
+              <div style={{ fontSize: 11, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--txt)' }}>{s.nome}</div>
+              <div style={{ fontSize: 9, color: 'var(--txt-3)', fontFamily: 'var(--font-m)' }}>{s.nome_gt} · {s.escritorio_regional}</div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-              <div style={{ width: 50 }}><Bar value={rate} max={100} color={color} height={4} /></div>
+              <div style={{ width: 48 }}><Bar value={rate} max={100} color={color} height={4} /></div>
               <span style={{ fontSize: 11, fontWeight: 700, color, fontFamily: 'var(--font-m)', width: 34, textAlign: 'right' }}>{rate}%</span>
             </div>
           </div>
@@ -95,37 +102,24 @@ function TopList({ title, startups, type, onSelect }) {
   )
 }
 
-function SegmentoChart({ bySegmento }) {
+function HorzChart({ title, rows, keyLabel, valueKey }) {
+  const max = Math.max(...rows.map(r => pct(r[valueKey])), 1)
   return (
     <div style={card}>
-      <div style={sTitle}>Presença média por segmento</div>
+      <div style={sTitle}>{title}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {bySegmento.map(s => (
-          <div key={s.seg} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 130, fontSize: 11, color: 'var(--gray-2)', flexShrink: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.seg}</div>
-            <Bar value={pct(s.avgPresenca)} max={100} color={pct(s.avgPresenca)>=70?'var(--green)':pct(s.avgPresenca)>=45?'var(--amber)':'var(--red)'} height={7} />
-            <div style={{ width: 34, textAlign: 'right', fontSize: 11, color: 'var(--gray-3)', fontFamily: 'var(--font-m)', flexShrink: 0 }}>{pct(s.avgPresenca)}%</div>
-            <div style={{ width: 18, textAlign: 'right', fontSize: 10, color: 'var(--gray-4)', flexShrink: 0 }}>{s.total}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function RegiaoChart({ byRegiao }) {
-  return (
-    <div style={card}>
-      <div style={sTitle}>Presença média por escritório regional</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {byRegiao.map(r => (
-          <div key={r.reg} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 148, fontSize: 11, color: 'var(--gray-2)', flexShrink: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.reg}</div>
-            <Bar value={pct(r.avgPresenca)} max={100} color={pct(r.avgPresenca)>=70?'var(--green)':pct(r.avgPresenca)>=45?'var(--amber)':'var(--red)'} height={7} />
-            <div style={{ width: 34, textAlign: 'right', fontSize: 11, color: 'var(--gray-3)', fontFamily: 'var(--font-m)', flexShrink: 0 }}>{pct(r.avgPresenca)}%</div>
-            <div style={{ width: 18, textAlign: 'right', fontSize: 10, color: 'var(--gray-4)', flexShrink: 0 }}>{r.total}</div>
-          </div>
-        ))}
+        {rows.map((r, i) => {
+          const p = pct(r[valueKey])
+          const col = presColor(p)
+          return (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 130, fontSize: 10, color: 'var(--txt-2)', flexShrink: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: 'var(--font-m)' }}>{r[keyLabel]}</div>
+              <Bar value={p} max={100} color={col} height={6} />
+              <div style={{ width: 34, textAlign: 'right', fontSize: 10, color: col, fontFamily: 'var(--font-m)', fontWeight: 600, flexShrink: 0 }}>{p}%</div>
+              <div style={{ width: 18, textAlign: 'right', fontSize: 9, color: 'var(--txt-3)', fontFamily: 'var(--font-m)', flexShrink: 0 }}>{r.total}</div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
@@ -133,7 +127,7 @@ function RegiaoChart({ byRegiao }) {
 
 export default function Analytics({ startups, onSelectStartup }) {
   const m = useMemo(() => programMetrics(startups), [startups])
-  if (!startups.length) return <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gray-4)', fontSize: 13 }}>Carregando…</div>
+  if (!startups.length) return <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--txt-3)', fontSize: 12, fontFamily: 'var(--font-m)' }}>carregando…</div>
 
   return (
     <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 24 }}>
@@ -142,12 +136,12 @@ export default function Analytics({ startups, onSelectStartup }) {
         <GTCard byGT={m.byGT} />
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
-        <TopList title="Top 10 mais engajadas"      startups={m.topEngajadas} type="top"  onSelect={onSelectStartup} />
-        <TopList title="Top 10 em situação crítica"  startups={m.topCriticas}  type="risk" onSelect={onSelectStartup} />
+        <TopList title="top 10 mais engajadas"     startups={m.topEngajadas} type="top"  onSelect={onSelectStartup} />
+        <TopList title="top 10 em situação crítica" startups={m.topCriticas}  type="risk" onSelect={onSelectStartup} />
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        <SegmentoChart bySegmento={m.bySegmento} />
-        <RegiaoChart   byRegiao={m.byRegiao} />
+        <HorzChart title="presença por segmento"          rows={m.bySegmento} keyLabel="seg" valueKey="avgPresenca" />
+        <HorzChart title="presença por escritório regional" rows={m.byRegiao}   keyLabel="reg" valueKey="avgPresenca" />
       </div>
     </div>
   )
