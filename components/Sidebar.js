@@ -2,13 +2,31 @@ import { useState } from 'react'
 import { calcHS, hsc, hsbg, daysSince, presencaDone } from '../lib/helpers'
 import { autoRiskLevel } from '../lib/metrics'
 
+function hscDark(hs) {
+  return hs >= 70 ? 'var(--green)' : hs >= 40 ? 'var(--amber)' : 'var(--red)'
+}
+function hsbgDark(hs) {
+  return hs >= 70 ? 'var(--green-dim)' : hs >= 40 ? 'var(--amber-dim)' : 'var(--red-dim)'
+}
+
 function NavBtn({ icon, label, active, badge, onClick }) {
   return (
-    <button onClick={onClick} title={label} style={{ width: 44, padding: '8px 0', background: active ? 'var(--orange)' : 'var(--orange-soft)', color: active ? 'var(--white)' : 'var(--orange)', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 9, letterSpacing: '.04em', transition: 'all .15s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, position: 'relative' }}>
+    <button onClick={onClick} title={label} style={{
+      width: 48, padding: '9px 0',
+      background: active ? 'var(--orange-dim)' : 'transparent',
+      color: active ? 'var(--orange)' : 'var(--txt-3)',
+      border: `1px solid ${active ? 'var(--orange-glow)' : 'transparent'}`,
+      borderRadius: 8, cursor: 'pointer',
+      fontFamily: 'var(--font-m)', fontWeight: 600, fontSize: 8,
+      letterSpacing: '.1em', transition: 'all .2s',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+      position: 'relative',
+      boxShadow: active ? '0 0 12px var(--orange-glow)' : 'none',
+    }}>
       {icon}
       {label}
       {badge > 0 && (
-        <div style={{ position: 'absolute', top: -4, right: -4, width: 16, height: 16, borderRadius: '50%', background: 'var(--red)', color: 'var(--white)', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--white)' }}>{badge}</div>
+        <div style={{ position: 'absolute', top: -3, right: -3, width: 16, height: 16, borderRadius: '50%', background: 'var(--red)', color: 'var(--txt)', fontSize: 8, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--bg-2)', animation: 'pulse 2s infinite' }}>{badge}</div>
       )}
     </button>
   )
@@ -16,6 +34,8 @@ function NavBtn({ icon, label, active, badge, onClick }) {
 
 function StartupItem({ s, cs, selected, onClick }) {
   const hs = calcHS(s, cs)
+  const col = hscDark(hs)
+  const bg  = hsbgDark(hs)
   const { attended, total } = presencaDone(s)
   const risk = autoRiskLevel(s)
   const preview = cs.notes
@@ -23,19 +43,27 @@ function StartupItem({ s, cs, selected, onClick }) {
     : `${attended}/${total} encontros · ${s.escritorio_regional || '—'}`
 
   return (
-    <div onClick={onClick} style={{ padding: '9px 16px', borderBottom: '1px solid var(--gray-6)', cursor: 'pointer', display: 'flex', gap: 9, alignItems: 'flex-start', background: selected ? '#FFF0EB' : 'transparent', borderLeft: selected ? '3px solid var(--orange)' : '3px solid transparent', transition: 'background .1s' }}>
-      <div style={{ width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-m)', fontSize: 10, fontWeight: 500, flexShrink: 0, background: hsbg(hs), color: hsc(hs), border: `1.5px solid ${hsc(hs)}` }}>{hs}</div>
+    <div onClick={onClick} style={{
+      padding: '9px 14px', borderBottom: '1px solid var(--border)',
+      cursor: 'pointer', display: 'flex', gap: 9, alignItems: 'flex-start',
+      background: selected ? 'var(--orange-dim)' : 'transparent',
+      borderLeft: selected ? '2px solid var(--orange)' : '2px solid transparent',
+      transition: 'all .15s',
+    }}>
+      <div style={{ width: 32, height: 32, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-m)', fontSize: 11, fontWeight: 600, flexShrink: 0, background: bg, color: col, border: `1px solid ${col}44` }}>
+        {hs}
+      </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.nome}</div>
-        <div style={{ fontSize: 10, color: 'var(--gray-4)', marginBottom: 2 }}>{s.founder_nome}</div>
-        <div style={{ fontSize: 10, color: 'var(--gray-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{preview}</div>
-        <div style={{ display: 'flex', gap: 3, marginTop: 3, flexWrap: 'wrap' }}>
-          {s.nome_gt && <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: 'var(--blue-soft)', color: 'var(--blue)', fontWeight: 500 }}>{s.nome_gt}</span>}
-          {cs.status !== 'ativo' && <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: cs.status==='churn'?'var(--red-soft)':cs.status==='risco'?'var(--amber-soft)':'var(--gray-6)', color: cs.status==='churn'?'var(--red)':cs.status==='risco'?'var(--amber)':'var(--gray-3)', fontWeight: 500 }}>{cs.status}</span>}
-          {risk === 'critico' && cs.status === 'ativo' && <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: 'var(--red-soft)', color: 'var(--red)', fontWeight: 500 }}>crítico</span>}
+        <div style={{ fontSize: 12, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: selected ? 'var(--orange)' : 'var(--txt)' }}>{s.nome}</div>
+        <div style={{ fontSize: 10, color: 'var(--txt-3)', marginBottom: 2 }}>{s.founder_nome}</div>
+        <div style={{ fontSize: 10, color: 'var(--txt-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: 'var(--font-m)' }}>{preview}</div>
+        <div style={{ display: 'flex', gap: 3, marginTop: 4, flexWrap: 'wrap' }}>
+          {s.nome_gt && <span style={{ fontSize: 8, padding: '1px 5px', borderRadius: 3, background: 'var(--blue-dim)', color: 'var(--blue)', fontWeight: 600, fontFamily: 'var(--font-m)', letterSpacing: '.05em' }}>{s.nome_gt}</span>}
+          {cs.status !== 'ativo' && <span style={{ fontSize: 8, padding: '1px 5px', borderRadius: 3, background: cs.status==='churn'?'var(--red-dim)':cs.status==='risco'?'var(--amber-dim)':'var(--bg-4)', color: cs.status==='churn'?'var(--red)':cs.status==='risco'?'var(--amber)':'var(--txt-3)', fontWeight: 600, fontFamily: 'var(--font-m)', letterSpacing: '.05em' }}>{cs.status}</span>}
+          {risk === 'critico' && cs.status === 'ativo' && <span style={{ fontSize: 8, padding: '1px 5px', borderRadius: 3, background: 'var(--red-dim)', color: 'var(--red)', fontWeight: 600, fontFamily: 'var(--font-m)', letterSpacing: '.05em' }}>CRÍTICO</span>}
         </div>
       </div>
-      <span style={{ fontSize: 9, color: 'var(--gray-4)', whiteSpace: 'nowrap', fontFamily: 'var(--font-m)', marginTop: 1 }}>{daysSince(cs.lastContact)}</span>
+      <span style={{ fontSize: 9, color: 'var(--txt-3)', whiteSpace: 'nowrap', fontFamily: 'var(--font-m)', marginTop: 1 }}>{daysSince(cs.lastContact)}</span>
     </div>
   )
 }
@@ -61,101 +89,85 @@ export default function Sidebar({ startups, selected, getCS, onSelect, activeVie
     return true
   }).sort((a, b) => calcHS(a, getCS(a.startup_id)) - calcHS(b, getCS(b.startup_id)))
 
-  function handleNavClick(view) {
-    onViewChange(view)
-    setPanelOpen(false)
-  }
-
-  function handleStartClick() {
-    setPanelOpen(o => !o)
-    if (!panelOpen) onViewChange('dashboard')
-  }
+  function handleNav(v) { onViewChange(v); setPanelOpen(false) }
 
   return (
     <aside style={{ display: 'flex', height: '100vh', flexShrink: 0 }}>
 
-      {/* ── nav strip ── */}
-      <div style={{ width: 64, background: 'var(--white)', borderRight: '1px solid var(--gray-6)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 0 16px', gap: 8, flexShrink: 0 }}>
+      {/* nav strip */}
+      <div style={{ width: 64, background: 'var(--bg-2)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 0', gap: 6, flexShrink: 0 }}>
         {/* logo */}
-        <div style={{ width: 36, height: 36, background: 'var(--orange)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-h)', fontWeight: 700, fontSize: 14, color: 'var(--white)', letterSpacing: -1, marginBottom: 4 }}>49</div>
-        <div style={{ fontSize: 8, fontWeight: 700, color: 'var(--gray-4)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 10 }}>CS DAY</div>
+        <div style={{ width: 38, height: 38, background: 'var(--orange)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-m)', fontWeight: 700, fontSize: 15, color: 'var(--bg)', letterSpacing: -1, marginBottom: 2, boxShadow: '0 0 20px var(--orange-glow)' }}>49</div>
+        <div style={{ fontSize: 7, fontWeight: 700, color: 'var(--txt-3)', letterSpacing: '.15em', marginBottom: 12 }}>CS DAY</div>
 
-        {/* START */}
         <NavBtn
-          icon={<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>}
+          icon={<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>}
           label="START"
           active={panelOpen}
           badge={alertTotal}
-          onClick={handleStartClick}
+          onClick={() => setPanelOpen(o => !o)}
         />
 
-        <div style={{ height: 1, width: 32, background: 'var(--gray-6)', margin: '4px 0' }} />
+        <div style={{ height: 1, width: 32, background: 'var(--border)', margin: '4px 0' }} />
 
-        {/* Dashboard */}
         <NavBtn
           icon={<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.3"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.3"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.3"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.3"/></svg>}
           label="DASH"
           active={!panelOpen && activeView === 'dashboard'}
-          onClick={() => handleNavClick('dashboard')}
+          onClick={() => handleNav('dashboard')}
         />
 
-        {/* Análise */}
         <NavBtn
-          icon={<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M1 13l4-5 3 3 3-5 4 2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+          icon={<svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M1 13l4-5 3 3 3-5 4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
           label="ANÁLISE"
           active={!panelOpen && activeView === 'analytics'}
-          onClick={() => handleNavClick('analytics')}
+          onClick={() => handleNav('analytics')}
         />
       </div>
 
-      {/* ── startup panel ── */}
+      {/* startup panel */}
       {panelOpen && (
-        <div style={{ width: 272, background: 'var(--white)', borderRight: '1px solid var(--gray-6)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid var(--gray-6)', flexShrink: 0 }}>
-            <div style={{ fontFamily: 'var(--font-h)', fontSize: 13, fontWeight: 600, marginBottom: 2 }}>START Primeiras Vendas</div>
-            <div style={{ fontSize: 10, color: 'var(--gray-4)', marginBottom: 12 }}>150 startups · Tamara Moraes</div>
+        <div style={{ width: 268, background: 'var(--bg-2)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ padding: '14px 14px 12px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+            <div style={{ fontFamily: 'var(--font-m)', fontSize: 11, fontWeight: 600, color: 'var(--orange)', letterSpacing: '.08em', marginBottom: 2 }}>START PRIMEIRAS VENDAS</div>
+            <div style={{ fontSize: 10, color: 'var(--txt-3)', fontFamily: 'var(--font-m)', marginBottom: 12 }}>150 startups · Tamara Moraes</div>
 
-            {/* GT filter */}
             <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
               {['todos','GT1','GT2','GT3'].map(gt => (
-                <button key={gt} onClick={() => setGtFilter(gt)} style={{ flex: 1, padding: '4px 0', fontSize: 10, fontWeight: 500, border: `1px solid ${gtFilter===gt?'var(--orange)':'var(--gray-5)'}`, borderRadius: 6, cursor: 'pointer', background: gtFilter===gt?'var(--orange-soft)':'transparent', color: gtFilter===gt?'var(--orange)':'var(--gray-4)', fontFamily: 'var(--font-b)' }}>{gt}</button>
+                <button key={gt} onClick={() => setGtFilter(gt)} style={{ flex: 1, padding: '4px 0', fontSize: 9, fontWeight: 600, border: `1px solid ${gtFilter===gt?'var(--orange)':'var(--border-2)'}`, borderRadius: 4, cursor: 'pointer', background: gtFilter===gt?'var(--orange-dim)':'transparent', color: gtFilter===gt?'var(--orange)':'var(--txt-3)', fontFamily: 'var(--font-m)', letterSpacing: '.06em', transition: 'all .15s' }}>{gt}</button>
               ))}
             </div>
 
-            {/* status filter */}
             <div style={{ display: 'flex', gap: 4, marginBottom: 10, flexWrap: 'wrap' }}>
               {[
-                { key: 'todas',   label: 'Todas' },
-                { key: 'critico', label: `Crítico (${criticos})` },
-                { key: 'risco',   label: `Risco (${riscos})` },
-                { key: 'churn',   label: `Churn (${churns})` },
+                { key: 'todas',   label: 'TODAS' },
+                { key: 'critico', label: `CRÍTICO·${criticos}` },
+                { key: 'risco',   label: `RISCO·${riscos}` },
+                { key: 'churn',   label: `CHURN·${churns}` },
               ].map(f => (
-                <button key={f.key} onClick={() => setFilter(f.key)} style={{ padding: '3px 8px', fontSize: 10, fontWeight: 500, border: `1px solid ${filter===f.key?'var(--orange)':'var(--gray-5)'}`, borderRadius: 20, cursor: 'pointer', background: filter===f.key?'var(--orange)':'transparent', color: filter===f.key?'var(--white)':'var(--gray-3)', fontFamily: 'var(--font-b)', whiteSpace: 'nowrap' }}>{f.label}</button>
+                <button key={f.key} onClick={() => setFilter(f.key)} style={{ padding: '3px 8px', fontSize: 8, fontWeight: 700, border: `1px solid ${filter===f.key?'var(--magenta)':'var(--border-2)'}`, borderRadius: 4, cursor: 'pointer', background: filter===f.key?'var(--magenta-dim)':'transparent', color: filter===f.key?'var(--magenta)':'var(--txt-3)', fontFamily: 'var(--font-m)', letterSpacing: '.08em', transition: 'all .15s', whiteSpace: 'nowrap' }}>{f.label}</button>
               ))}
             </div>
 
-            {/* search */}
             <div style={{ position: 'relative' }}>
               <svg style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} width="13" height="13" viewBox="0 0 14 14" fill="none">
-                <circle cx="6" cy="6" r="4.5" stroke="#9A9A9A" strokeWidth="1.2"/>
-                <path d="M9.5 9.5L12 12" stroke="#9A9A9A" strokeWidth="1.2" strokeLinecap="round"/>
+                <circle cx="6" cy="6" r="4.5" stroke="var(--txt-3)" strokeWidth="1.2"/>
+                <path d="M9.5 9.5L12 12" stroke="var(--txt-3)" strokeWidth="1.2" strokeLinecap="round"/>
               </svg>
-              <input style={{ width: '100%', padding: '7px 9px 7px 28px', fontSize: 12, fontFamily: 'var(--font-b)', border: '1px solid var(--gray-6)', borderRadius: 6, background: 'var(--gray-7)', color: 'var(--black)', outline: 'none' }} placeholder="Buscar…" value={query} onChange={e => setQuery(e.target.value)} />
+              <input style={{ width: '100%', padding: '7px 9px 7px 28px', fontSize: 11, fontFamily: 'var(--font-m)', border: '1px solid var(--border-2)', borderRadius: 6, background: 'var(--bg-3)', color: 'var(--txt)', outline: 'none', transition: 'border-color .15s' }} placeholder="buscar startup…" value={query} onChange={e => setQuery(e.target.value)} onFocus={e => e.target.style.borderColor='var(--orange)'} onBlur={e => e.target.style.borderColor='var(--border-2)'} />
             </div>
           </div>
 
-          <div style={{ padding: '7px 16px 5px', display: 'flex', justifyContent: 'space-between', flexShrink: 0 }}>
-            <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--gray-4)', textTransform: 'uppercase', letterSpacing: '.07em' }}>Startups</span>
-            <span style={{ fontSize: 10, color: 'var(--gray-4)', fontFamily: 'var(--font-m)' }}>{filtered.length}</span>
+          <div style={{ padding: '6px 14px 4px', display: 'flex', justifyContent: 'space-between', flexShrink: 0 }}>
+            <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--txt-3)', letterSpacing: '.1em', fontFamily: 'var(--font-m)' }}>STARTUPS</span>
+            <span style={{ fontSize: 9, color: 'var(--orange)', fontFamily: 'var(--font-m)', fontWeight: 600 }}>{filtered.length}</span>
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto' }}>
-            {filtered.length === 0 && <div style={{ padding: 16, textAlign: 'center', fontSize: 12, color: 'var(--gray-4)' }}>Nenhuma startup encontrada</div>}
+            {filtered.length === 0 && <div style={{ padding: 16, textAlign: 'center', fontSize: 11, color: 'var(--txt-3)', fontFamily: 'var(--font-m)' }}>nenhum resultado</div>}
             {filtered.map(s => (
               <StartupItem
-                key={s.startup_id}
-                s={s}
-                cs={getCS(s.startup_id)}
+                key={s.startup_id} s={s} cs={getCS(s.startup_id)}
                 selected={selected?.startup_id === s.startup_id}
                 onClick={() => { onSelect(s); onViewChange('startup') }}
               />
