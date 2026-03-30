@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { DONE_SPRINTS } from '../lib/metrics'
 import { calcHS, daysSince, ini } from '../lib/helpers'
 import { autoRiskLevel, workshopRate, mentoriaRate, pct } from '../lib/metrics'
+import BulkSendModal from './BulkSendModal'
 
 const card = { background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:12 }
 
@@ -10,6 +11,8 @@ export default function StartupsView({ startups, getCS, onSelectStartup }) {
   const [sortDir, setSortDir] = useState('asc')
   const [gtFilter, setGtFilter] = useState('todos')
   const [statusFilter, setStatusFilter] = useState('todos')
+  const [selected, setSelected] = useState(new Set())
+  const [showBulkSend, setShowBulkSend] = useState(false)
   const [query, setQuery] = useState('')
 
   const done = DONE_SPRINTS.length
@@ -63,10 +66,34 @@ export default function StartupsView({ startups, getCS, onSelectStartup }) {
     )
   }
 
+  function toggleSelect(id) { setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n }) }
+  function selectAll() { setSelected(new Set(rows.map(s => s.startup_id))) }
+  function selectNone() { setSelected(new Set()) }
+
+  function getBulkRecipients() {
+    return rows.filter(s => selected.has(s.startup_id)).map(s => ({
+      startup_id: s.startup_id, startup_name: s.nome, founder_name: s.founder_nome,
+      phone: s.founder_telefone, gt: s.nome_gt, mentor: s.nome_mentor, link_meet: s.link_meet,
+    }))
+  }
+
   if (!startups.length) return <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--txt-3)', fontSize:12, fontFamily:'var(--font-body)' }}>Carregando…</div>
 
   return (
     <div style={{ flex:1, overflowY:'auto', paddingBottom:24 }}>
+      {showBulkSend && <BulkSendModal recipients={getBulkRecipients()} onClose={() => { setShowBulkSend(false); setSelected(new Set()) }} />}
+
+      {/* Selection bar */}
+      {selected.size > 0 && (
+        <div style={{ ...card, marginBottom:10, padding:'10px 16px', display:'flex', alignItems:'center', gap:10, borderLeft:'2px solid var(--orange)', borderRadius:12 }}>
+          <span style={{ fontSize:12, fontWeight:600, color:'var(--orange)', fontFamily:'var(--font-body)' }}>{selected.size} selecionadas</span>
+          <button onClick={selectNone} style={{ fontSize:10, padding:'4px 10px', border:'none', borderRadius:6, cursor:'pointer', background:'var(--bg-3)', color:'var(--txt-3)', fontFamily:'var(--font-body)' }}>Limpar</button>
+          <div style={{ flex:1 }} />
+          <button onClick={() => setShowBulkSend(true)} style={{ fontSize:11, padding:'7px 16px', border:'none', borderRadius:8, cursor:'pointer', background:'var(--orange)', color:'#fff', fontFamily:'var(--font-body)', fontWeight:600 }}>
+            Enviar mensagem para {selected.size}
+          </button>
+        </div>
+      )}
 
       {/* Filters bar */}
       <div style={{ display:'flex', gap:8, marginBottom:10, alignItems:'center', flexWrap:'wrap' }}>
@@ -98,7 +125,10 @@ export default function StartupsView({ startups, getCS, onSelectStartup }) {
       {/* Table */}
       <div style={{ ...card, overflow:'hidden' }}>
         {/* Header */}
-        <div style={{ display:'grid', gridTemplateColumns:'36px 1.2fr 1fr 55px 55px 70px 70px 65px 70px', padding:'10px 16px', borderBottom:'1px solid var(--border)', background:'var(--bg-3)', alignItems:'center', gap:4 }}>
+        <div style={{ display:'grid', gridTemplateColumns:'30px 36px 1.2fr 1fr 55px 55px 70px 70px 65px 70px', padding:'10px 16px', borderBottom:'1px solid var(--border)', background:'var(--bg-3)', alignItems:'center', gap:4 }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <input type="checkbox" checked={selected.size===rows.length&&rows.length>0} onChange={()=>selected.size===rows.length?selectNone():selectAll()} style={{ accentColor:'var(--orange)', cursor:'pointer' }} />
+          </div>
           <div style={{ fontSize:9, color:'var(--txt-3)', fontFamily:'var(--font-body)', fontWeight:600 }}>#</div>
           <SortHeader col="nome" label="Startup" />
           <SortHeader col="founder" label="Founder" />
@@ -121,13 +151,16 @@ export default function StartupsView({ startups, getCS, onSelectStartup }) {
           const statusLabel = cs.status!=='ativo'?cs.status:risk==='critico'?'crítico':risk==='engajado'?'engajado':'ativo'
 
           return (
-            <div key={s.startup_id} onClick={()=>onSelectStartup(s)} style={{ display:'grid', gridTemplateColumns:'36px 1.2fr 1fr 55px 55px 70px 70px 65px 70px', padding:'8px 16px', borderBottom:'1px solid var(--border)', cursor:'pointer', alignItems:'center', gap:4, transition:'background .1s' }}
-              onMouseEnter={e=>e.currentTarget.style.background='var(--bg-3)'}
-              onMouseLeave={e=>e.currentTarget.style.background='transparent'}
+            <div key={s.startup_id} style={{ display:'grid', gridTemplateColumns:'30px 36px 1.2fr 1fr 55px 55px 70px 70px 65px 70px', padding:'8px 16px', borderBottom:'1px solid var(--border)', cursor:'pointer', alignItems:'center', gap:4, transition:'background .1s', background:selected.has(s.startup_id)?'var(--orange-soft)':'transparent' }}
+              onMouseEnter={e=>{if(!selected.has(s.startup_id))e.currentTarget.style.background='var(--bg-3)'}}
+              onMouseLeave={e=>{if(!selected.has(s.startup_id))e.currentTarget.style.background='transparent'}}
             >
-              <div style={{ fontSize:10, color:'var(--txt-3)', fontFamily:'var(--font-mono)' }}>{String(i+1).padStart(2,'0')}</div>
-              <div style={{ fontSize:11, fontWeight:600, color:'var(--txt)', fontFamily:'var(--font-body)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{s.nome}</div>
-              <div style={{ fontSize:10, color:'var(--txt-3)', fontFamily:'var(--font-body)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{s.founder_nome}</div>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'center' }} onClick={e=>e.stopPropagation()}>
+                <input type="checkbox" checked={selected.has(s.startup_id)} onChange={()=>toggleSelect(s.startup_id)} style={{ accentColor:'var(--orange)', cursor:'pointer' }} />
+              </div>
+              <div onClick={()=>onSelectStartup(s)} style={{ fontSize:10, color:'var(--txt-3)', fontFamily:'var(--font-mono)' }}>{String(i+1).padStart(2,'0')}</div>
+              <div onClick={()=>onSelectStartup(s)} style={{ fontSize:11, fontWeight:600, color:'var(--txt)', fontFamily:'var(--font-body)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{s.nome}</div>
+              <div onClick={()=>onSelectStartup(s)} style={{ fontSize:10, color:'var(--txt-3)', fontFamily:'var(--font-body)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{s.founder_nome}</div>
               <div style={{ fontSize:10, color:'var(--blue)', fontFamily:'var(--font-body)', fontWeight:500 }}>{s.nome_gt||'—'}</div>
               <div style={{ fontSize:11, fontWeight:700, color:hs>=70?'var(--green)':hs>=40?'var(--amber)':'var(--red)', fontFamily:'var(--font-mono)' }}>{hs}</div>
               <div style={{ fontSize:10, color:wk>=70?'var(--green)':wk>=40?'var(--amber)':'var(--red)', fontFamily:'var(--font-mono)' }}>{wk}%</div>
