@@ -26,8 +26,7 @@ export default async function handler(req, res) {
   const data = body.data
   if (!data?.key) return res.status(200).json({ ok: true, skipped: 'no key' })
 
-  // Skip messages sent by us
-  if (data.key.fromMe) return res.status(200).json({ ok: true, skipped: 'fromMe' })
+  const fromMe = data.key.fromMe === true
 
   // Extract phone number from remoteJid (format: 5511999999999@s.whatsapp.net)
   const remoteJid = data.key.remoteJid || ''
@@ -102,15 +101,22 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, skipped: 'unknown contact', phone })
   }
 
+  // Check for duplicate (same remote_id)
+  if (remoteId) {
+    const { data: existing } = await db.from('message_history')
+      .select('id').eq('remote_id', remoteId).limit(1)
+    if (existing?.length) return res.status(200).json({ ok: true, skipped: 'duplicate' })
+  }
+
   // Save to message_history
   const { error } = await db.from('message_history').insert({
     startup_id: matchedStartup.startup_id,
     phone,
     message_text: text,
-    direction: 'incoming',
-    sender_name: senderName || matchedStartup.founder_nome,
+    direction: fromMe ? 'outgoing' : 'incoming',
+    sender_name: fromMe ? 'Tamara' : (senderName || matchedStartup.founder_nome),
     remote_id: remoteId,
-    status: 'received',
+    status: fromMe ? 'sent' : 'received',
     sent_at: timestamp,
   })
 

@@ -49,7 +49,8 @@ export default async function handler(req, res) {
       return res.status(response.status).json({ error: data.message || 'Failed to send message', details: data })
     }
 
-    // Log successful message to history
+    // Log successful message to history with remote_id to prevent webhook duplicate
+    const remoteId = data?.key?.id || null
     if (startup_id) {
       await db.from('message_history').insert({
         startup_id,
@@ -58,6 +59,7 @@ export default async function handler(req, res) {
         template_name: template_name || null,
         message_text: text,
         direction: 'outgoing',
+        remote_id: remoteId,
         status: 'sent',
       })
     }
