@@ -209,9 +209,9 @@ function ChatView({ s, messages, onRefresh }) {
   })
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', height:'100%', margin:'-18px -20px', overflow:'hidden', minHeight:0, maxWidth:'100%' }}>
+    <div style={{ display:'flex', flexDirection:'column', height:'100%', margin:'-18px -20px', overflow:'hidden', minHeight:0, width:'calc(100% + 40px)' }}>
       {/* Chat messages */}
-      <div style={{ flex:1, overflowY:'auto', overflowX:'hidden', padding:'14px 16px', minHeight:0 }}>
+      <div style={{ flex:1, overflowY:'auto', overflowX:'hidden', padding:'14px 20px', minHeight:0 }}>
         {grouped.length === 0 && (
           <div style={{ height:'100%', display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:8 }}>
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="var(--txt-3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -264,7 +264,7 @@ function ChatView({ s, messages, onRefresh }) {
 
       {/* Template picker */}
       {showTplPicker && (
-        <div style={{ borderTop:'1px solid var(--border)', padding:'8px 12px', maxHeight:180, overflowY:'auto', background:'var(--bg-2)' }}>
+        <div style={{ borderTop:'1px solid var(--border)', padding:'8px 16px', maxHeight:180, overflowY:'auto', background:'var(--bg-2)' }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
             <span style={{ fontSize:10, fontWeight:600, color:'var(--txt-3)', letterSpacing:'.06em', fontFamily:'var(--font-body)' }}>TEMPLATES</span>
             <button onClick={()=>setShowTplPicker(false)} style={{ fontSize:10, color:'var(--txt-3)', background:'transparent', border:'none', cursor:'pointer', fontFamily:'var(--font-body)' }}>Fechar</button>
@@ -282,7 +282,7 @@ function ChatView({ s, messages, onRefresh }) {
       )}
 
       {/* Input area */}
-      <div style={{ borderTop:'1px solid var(--border)', padding:'10px 12px', display:'flex', gap:6, alignItems:'flex-end', background:'var(--bg-2)', flexShrink:0 }}>
+      <div style={{ borderTop:'1px solid var(--border)', padding:'10px 16px', display:'flex', gap:6, alignItems:'flex-end', background:'var(--bg-2)', flexShrink:0 }}>
         <button onClick={()=>setShowTplPicker(v=>!v)} title="Templates" style={{ width:34, height:34, borderRadius:8, border:'none', background:showTplPicker?'var(--orange-dim)':'var(--bg-3)', color:showTplPicker?'var(--orange)':'var(--txt-3)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'all .15s' }}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.2"/><rect x="9.5" y="1.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.2"/><rect x="1.5" y="9.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.2"/></svg>
         </button>
@@ -418,9 +418,9 @@ function TabMensagens({ s }) {
   }, [s.startup_id, subTab])
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', flex:1, margin:'-18px -20px', minHeight:0, overflow:'hidden' }}>
+    <div style={{ display:'flex', flexDirection:'column', flex:1, margin:'-18px -20px', minHeight:0, overflow:'hidden', width:'calc(100% + 40px)' }}>
       {/* Sub-tab bar */}
-      <div style={{ display:'flex', borderBottom:'1px solid var(--border)', padding:'0 16px', flexShrink:0 }}>
+      <div style={{ display:'flex', borderBottom:'1px solid var(--border)', padding:'0 20px', flexShrink:0 }}>
         {[{key:'chat',label:'Chat'},{key:'templates',label:'Templates'}].map(t=>(
           <button key={t.key} onClick={()=>setSubTab(t.key)} style={{ padding:'9px 14px', fontSize:11, fontWeight:subTab===t.key?600:400, border:'none', background:'transparent', cursor:'pointer', color:subTab===t.key?'var(--orange)':'var(--txt-3)', fontFamily:'var(--font-body)', borderBottom:subTab===t.key?'2px solid var(--orange)':'2px solid transparent', marginBottom:-1, transition:'all .15s' }}>
             {t.label}
@@ -430,7 +430,7 @@ function TabMensagens({ s }) {
       </div>
 
       {/* Content */}
-      <div style={{ flex:1, overflow:subTab==='chat'?'hidden':'auto', padding:subTab==='templates'?'16px 16px':'0', minHeight:0, display:'flex', flexDirection:'column' }}>
+      <div style={{ flex:1, overflow:subTab==='chat'?'hidden':'auto', padding:subTab==='templates'?'16px 20px':'0', minHeight:0, display:'flex', flexDirection:'column' }}>
         {subTab === 'chat' && <ChatView s={s} messages={messages} onRefresh={loadMessages} />}
         {subTab === 'templates' && <TemplatesView s={s} />}
       </div>

@@ -17,6 +17,7 @@ export default function Home() {
   const [error, setError]         = useState(null)
   const [selected, setSelected]   = useState(null)
   const [view, setView]           = useState('hoje')
+  const [prevView, setPrevView]   = useState('hoje')
   const [copilotOpen, setCopilot] = useState(false)
   const [syncing, setSyncing]     = useState(false)
   const { getCS, patchCS }        = useCSData()
@@ -33,7 +34,8 @@ export default function Home() {
 
   useEffect(()=>{ loadData().finally(()=>setLoading(false)) },[])
   async function sync() { setSyncing(true); await loadData(); setSyncing(false) }
-  function selectStartup(s) { setSelected(s); setView('startup') }
+  function selectStartup(s) { setSelected(s); setPrevView(view); setView('startup') }
+  function goBack() { setView(prevView) }
 
   const titles = {
     hoje: 'Hoje',
@@ -75,8 +77,24 @@ export default function Home() {
           {/* topbar */}
           <div style={{ background:'var(--bg-2)', borderBottom:'1px solid var(--border)', padding:'0 24px', height:52, display:'flex', alignItems:'center', gap:12, flexShrink:0 }}>
             <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontFamily:'var(--font-body)', fontSize:15, fontWeight:700, letterSpacing:'-0.2px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', color:'var(--txt)' }}>{titles[view]}</div>
-              <div style={{ fontSize:11, color:'var(--txt-3)', marginTop:1, fontFamily:'var(--font-body)', fontWeight:400 }}>{subtitles[view]}</div>
+              {view === 'startup' ? (
+                <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                  <button onClick={goBack} style={{ display:'flex', alignItems:'center', gap:5, background:'none', border:'none', cursor:'pointer', fontFamily:'var(--font-body)', fontSize:13, fontWeight:500, color:'var(--txt-3)', padding:0, transition:'color .15s' }}
+                    onMouseEnter={e=>e.currentTarget.style.color='var(--orange)'}
+                    onMouseLeave={e=>e.currentTarget.style.color='var(--txt-3)'}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 3L5 7l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    {titles[prevView]}
+                  </button>
+                  <span style={{ color:'var(--txt-3)', fontSize:12 }}>/</span>
+                  <span style={{ fontFamily:'var(--font-body)', fontSize:15, fontWeight:700, color:'var(--txt)', letterSpacing:'-0.2px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{selected?.nome}</span>
+                </div>
+              ) : (
+                <>
+                  <div style={{ fontFamily:'var(--font-body)', fontSize:15, fontWeight:700, letterSpacing:'-0.2px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', color:'var(--txt)' }}>{titles[view]}</div>
+                  <div style={{ fontSize:11, color:'var(--txt-3)', marginTop:1, fontFamily:'var(--font-body)', fontWeight:400 }}>{subtitles[view]}</div>
+                </>
+              )}
             </div>
 
             <button onClick={sync} disabled={syncing} style={{ padding:'7px 14px', fontSize:11, fontWeight:500, border:'none', borderRadius:8, cursor:syncing?'not-allowed':'pointer', background:'var(--bg-3)', fontFamily:'var(--font-body)', color:'var(--txt-3)', display:'flex', alignItems:'center', gap:6, opacity:syncing?.6:1, flexShrink:0, transition:'all .15s' }}
