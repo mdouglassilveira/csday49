@@ -52,9 +52,9 @@ export default function Home() {
 
       {loading && (
         <div style={{ position:'fixed', inset:0, background:'var(--bg)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:16, zIndex:999 }}>
-          <div style={{ width:44, height:44, border:'2px solid var(--border-2)', borderTopColor:'var(--orange)', borderRadius:'50%', animation:'spin .7s linear infinite', boxShadow:'0 0 20px var(--orange-glow)' }} />
-          <div style={{ fontFamily:'var(--font-title)', fontSize:22, color:'var(--orange)', letterSpacing:'.08em' }}>CS Day</div>
-          <div style={{ fontSize:11, color:'var(--txt-3)', fontFamily:'var(--font-body)', fontWeight:400, letterSpacing:'.06em' }}>Carregando startups…</div>
+          <div style={{ width:40, height:40, border:'2px solid var(--border-2)', borderTopColor:'var(--orange)', borderRadius:'50%', animation:'spin .8s linear infinite' }} />
+          <div style={{ fontFamily:'var(--font-body)', fontSize:16, fontWeight:700, color:'var(--txt)', letterSpacing:'-0.2px' }}>CS Day</div>
+          <div style={{ fontSize:11, color:'var(--txt-3)', fontFamily:'var(--font-body)', fontWeight:400 }}>Carregando startups…</div>
         </div>
       )}
 
@@ -64,17 +64,15 @@ export default function Home() {
         <main style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', height:'100vh', overflow:'hidden' }}>
 
           {/* topbar */}
-          <div style={{ background:'var(--bg-2)', borderBottom:'1px solid var(--border)', padding:'0 24px', height:52, display:'flex', alignItems:'center', gap:12, flexShrink:0 }}>
+          <div style={{ background:'var(--bg-2)', borderBottom:'1px solid var(--border)', padding:'0 24px', height:54, display:'flex', alignItems:'center', gap:12, flexShrink:0 }}>
             <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontFamily:'var(--font-title)', fontSize:16, letterSpacing:'.04em', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', color:'var(--txt)' }}>{topTitle[view]}</div>
-              <div style={{ fontSize:10, color:'var(--txt-3)', marginTop:1, fontFamily:'var(--font-body)', fontWeight:400 }}>{topSub[view]}</div>
+              <div style={{ fontFamily:'var(--font-body)', fontSize:15, fontWeight:700, letterSpacing:'-0.2px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', color:'var(--txt)' }}>{topTitle[view]}</div>
+              <div style={{ fontSize:11, color:'var(--txt-3)', marginTop:1, fontFamily:'var(--font-body)', fontWeight:400 }}>{topSub[view]}</div>
             </div>
 
-            <div style={{ width:1, height:20, background:'var(--border)', flexShrink:0 }} />
-
-            <button onClick={sync} disabled={syncing} style={{ padding:'6px 14px', fontSize:11, fontWeight:600, border:'1px solid var(--border-2)', borderRadius:6, cursor:syncing?'not-allowed':'pointer', background:'transparent', fontFamily:'var(--font-body)', color:'var(--txt-3)', display:'flex', alignItems:'center', gap:5, opacity:syncing?.6:1, flexShrink:0, transition:'all .15s' }}
-              onMouseEnter={e=>{ if(!syncing){e.currentTarget.style.borderColor='var(--orange)';e.currentTarget.style.color='var(--orange)'}}}
-              onMouseLeave={e=>{ e.currentTarget.style.borderColor='var(--border-2)';e.currentTarget.style.color='var(--txt-3)' }}
+            <button onClick={sync} disabled={syncing} style={{ padding:'7px 14px', fontSize:11, fontWeight:500, border:'none', borderRadius:8, cursor:syncing?'not-allowed':'pointer', background:'var(--bg-3)', fontFamily:'var(--font-body)', color:'var(--txt-3)', display:'flex', alignItems:'center', gap:6, opacity:syncing?.6:1, flexShrink:0, transition:'all .15s' }}
+              onMouseEnter={e=>{ if(!syncing){e.currentTarget.style.background='var(--bg-4)';e.currentTarget.style.color='var(--orange)'}}}
+              onMouseLeave={e=>{ e.currentTarget.style.background='var(--bg-3)';e.currentTarget.style.color='var(--txt-3)' }}
             >
               <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style={{ animation:syncing?'spin .7s linear infinite':'none' }}>
                 <path d="M11 6.5A4.5 4.5 0 116.5 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
@@ -83,7 +81,7 @@ export default function Home() {
               {syncing?'Sincronizando…':'Sincronizar'}
             </button>
 
-            <button onClick={()=>setCopilot(o=>!o)} style={{ padding:'6px 14px', fontSize:11, fontWeight:600, border:`1px solid ${copilotOpen?'var(--orange)':'var(--border-2)'}`, borderRadius:6, cursor:'pointer', background:copilotOpen?'var(--orange-dim)':'transparent', fontFamily:'var(--font-body)', color:copilotOpen?'var(--orange)':'var(--txt-3)', display:'flex', alignItems:'center', gap:5, transition:'all .15s', flexShrink:0 }}>
+            <button onClick={()=>setCopilot(o=>!o)} style={{ padding:'7px 14px', fontSize:11, fontWeight:500, border:'none', borderRadius:8, cursor:'pointer', background:copilotOpen?'var(--orange-dim)':'var(--bg-3)', fontFamily:'var(--font-body)', color:copilotOpen?'var(--orange)':'var(--txt-3)', display:'flex', alignItems:'center', gap:6, transition:'all .15s', flexShrink:0 }}>
               <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                 <rect x=".5" y=".5" width="12" height="8.5" rx="1.5" stroke="currentColor" strokeWidth="1.1"/>
                 <path d="M3.5 11l3-2 3 2" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/>
@@ -92,7 +90,7 @@ export default function Home() {
             </button>
           </div>
 
-          {error && <div style={{ margin:'10px 24px 0', background:'var(--red-dim)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:8, padding:'9px 14px', fontSize:11, color:'var(--red)', flexShrink:0, fontFamily:'var(--font-body)', fontWeight:500 }}>⚠ Erro ao carregar dados: {error}</div>}
+          {error && <div style={{ margin:'10px 24px 0', background:'var(--red-dim)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:10, padding:'10px 16px', fontSize:11, color:'var(--red)', flexShrink:0, fontFamily:'var(--font-body)', fontWeight:500 }}>Erro ao carregar dados: {error}</div>}
 
           <div style={{ flex:1, overflow:'hidden', padding:'14px 24px 0', display:'flex', gap:12, minHeight:0 }}>
             {view==='dashboard' && (

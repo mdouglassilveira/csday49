@@ -2,14 +2,14 @@ import { useMemo } from 'react'
 import { programMetrics, pct, presencaRate } from '../lib/metrics'
 import { ini } from '../lib/helpers'
 
-const card = { background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:10, padding:'18px 20px' }
-const sTitle = { fontFamily:'var(--font-body)', fontSize:9, fontWeight:700, color:'var(--txt-3)', textTransform:'uppercase', letterSpacing:'.14em', marginBottom:14 }
+const card = { background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:12, padding:'20px' }
+const sTitle = { fontFamily:'var(--font-body)', fontSize:10, fontWeight:600, color:'var(--txt-3)', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:14 }
 
 function Bar({ value, max, color, height=6 }) {
   const w = max>0?Math.round((value/max)*100):0
   return (
-    <div style={{ background:'var(--bg-4)', borderRadius:2, height, overflow:'hidden', flex:1 }}>
-      <div style={{ width:`${w}%`, height:'100%', background:color, borderRadius:2, transition:'width .5s ease' }} />
+    <div style={{ background:'var(--bg-4)', borderRadius:99, height, overflow:'hidden', flex:1 }}>
+      <div style={{ width:`${w}%`, height:'100%', background:color, borderRadius:99, transition:'width .5s ease' }} />
     </div>
   )
 }
@@ -34,7 +34,7 @@ function RiskDist({ riskMap, total }) {
           return (
             <div key={key} style={{ display:'flex', alignItems:'center', gap:10 }}>
               <div style={{ width:68, fontSize:11, color, fontWeight:600, flexShrink:0, fontFamily:'var(--font-body)' }}>{label}</div>
-              <Bar value={count} max={total} color={color} height={7} />
+              <Bar value={count} max={total} color={color} height={6} />
               <div style={{ width:34, textAlign:'right', fontSize:11, color:'var(--txt-2)', fontFamily:'var(--font-mono)', flexShrink:0 }}>{w}%</div>
               <div style={{ width:24, textAlign:'right', fontSize:11, color:'var(--txt-3)', fontFamily:'var(--font-mono)', flexShrink:0 }}>{count}</div>
             </div>
@@ -57,16 +57,16 @@ function GTCard({ byGT }) {
             <div key={gt}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                  <span style={{ fontFamily:'var(--font-title)', fontSize:20, color:'var(--orange)' }}>{gt}</span>
+                  <span style={{ fontFamily:'var(--font-body)', fontSize:16, fontWeight:700, color:'var(--orange)' }}>{gt}</span>
                   <span style={{ fontSize:11, color:'var(--txt-3)', fontFamily:'var(--font-body)', fontWeight:400 }}>{data.mentor}</span>
                 </div>
                 <div style={{ display:'flex', gap:12, alignItems:'center' }}>
                   <span style={{ fontSize:10, color:'var(--green)', fontFamily:'var(--font-mono)' }}>{data.engajados} ✓</span>
                   <span style={{ fontSize:10, color:'var(--red)', fontFamily:'var(--font-mono)' }}>{data.criticos} ✕</span>
-                  <span style={{ fontFamily:'var(--font-title)', fontSize:22, color:col }}>{p}%</span>
+                  <span style={{ fontFamily:'var(--font-body)', fontSize:18, fontWeight:800, color:col }}>{p}%</span>
                 </div>
               </div>
-              <Bar value={p} max={100} color={col} height={6} />
+              <Bar value={p} max={100} color={col} height={5} />
             </div>
           )
         })}
@@ -89,14 +89,14 @@ function TopList({ title, startups, type, onSelect }) {
             onMouseLeave={e=>e.currentTarget.style.opacity='1'}
           >
             <div style={{ width:20, fontSize:10, color:'var(--txt-3)', fontFamily:'var(--font-mono)', flexShrink:0 }}>{String(i+1).padStart(2,'0')}</div>
-            <div style={{ width:30, height:30, borderRadius:6, background:dimColor, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color, flexShrink:0, fontFamily:'var(--font-body)', border:`1px solid ${color}44` }}>{ini(s.nome)}</div>
+            <div style={{ width:28, height:28, borderRadius:8, background:dimColor, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color, flexShrink:0, fontFamily:'var(--font-body)' }}>{ini(s.nome)}</div>
             <div style={{ flex:1, minWidth:0 }}>
               <div style={{ fontSize:11, fontWeight:600, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', color:'var(--txt)', fontFamily:'var(--font-body)' }}>{s.nome}</div>
               <div style={{ fontSize:10, color:'var(--txt-3)', fontFamily:'var(--font-body)', fontWeight:400 }}>{s.nome_gt} · {s.escritorio_regional}</div>
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:7, flexShrink:0 }}>
               <div style={{ width:50 }}><Bar value={rate} max={100} color={color} height={4} /></div>
-              <span style={{ fontSize:12, fontWeight:700, color, fontFamily:'var(--font-title)', width:36, textAlign:'right' }}>{rate}%</span>
+              <span style={{ fontSize:12, fontWeight:700, color, fontFamily:'var(--font-body)', width:36, textAlign:'right' }}>{rate}%</span>
             </div>
           </div>
         )
@@ -116,8 +116,8 @@ function HorzChart({ title, rows, keyLabel, valueKey }) {
           return (
             <div key={i} style={{ display:'flex', alignItems:'center', gap:10 }}>
               <div style={{ width:130, fontSize:11, color:'var(--txt-2)', flexShrink:0, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', fontFamily:'var(--font-body)', fontWeight:400 }}>{r[keyLabel]}</div>
-              <Bar value={p} max={100} color={col} height={6} />
-              <div style={{ width:36, textAlign:'right', fontSize:11, color:col, fontFamily:'var(--font-title)', fontWeight:400, flexShrink:0 }}>{p}%</div>
+              <Bar value={p} max={100} color={col} height={5} />
+              <div style={{ width:36, textAlign:'right', fontSize:11, color:col, fontFamily:'var(--font-body)', fontWeight:700, flexShrink:0 }}>{p}%</div>
               <div style={{ width:18, textAlign:'right', fontSize:10, color:'var(--txt-3)', fontFamily:'var(--font-mono)', flexShrink:0 }}>{r.total}</div>
             </div>
           )

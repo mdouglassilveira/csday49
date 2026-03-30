@@ -37,28 +37,28 @@ export default function Copilot({ startup, cs, getCS, allStartups }) {
   }
 
   return (
-    <div style={{ background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:10, display:'flex', flexDirection:'column', overflow:'hidden', height:'100%' }}>
-      <div style={{ padding:'12px 16px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
-        <div style={{ width:8, height:8, borderRadius:'50%', background:'var(--orange)', animation:'pulse 2s infinite', boxShadow:'0 0 8px var(--orange)' }} />
-        <span style={{ fontFamily:'var(--font-body)', fontSize:11, fontWeight:700, letterSpacing:'.1em', color:'var(--orange)', textTransform:'uppercase' }}>Copilot CS</span>
-        {startup && <span style={{ marginLeft:'auto', fontSize:10, color:'var(--txt-3)', background:'var(--bg-4)', padding:'2px 8px', borderRadius:4, fontFamily:'var(--font-body)', fontWeight:400, maxWidth:130, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{startup.nome}</span>}
+    <div style={{ background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:12, display:'flex', flexDirection:'column', overflow:'hidden', height:'100%' }}>
+      <div style={{ padding:'14px 16px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
+        <div style={{ width:7, height:7, borderRadius:'50%', background:'var(--orange)', animation:'pulse 2.5s infinite' }} />
+        <span style={{ fontFamily:'var(--font-body)', fontSize:11, fontWeight:700, letterSpacing:'.06em', color:'var(--orange)', textTransform:'uppercase' }}>Copilot</span>
+        {startup && <span style={{ marginLeft:'auto', fontSize:10, color:'var(--txt-3)', background:'var(--bg-4)', padding:'3px 8px', borderRadius:6, fontFamily:'var(--font-body)', fontWeight:400, maxWidth:130, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{startup.nome}</span>}
       </div>
 
-      <div style={{ flex:1, overflowY:'auto', padding:14, display:'flex', flexDirection:'column', gap:10 }}>
+      <div style={{ flex:1, overflowY:'auto', padding:14, display:'flex', flexDirection:'column', gap:8 }}>
         {messages.map((m,i)=>(
-          <div key={i} style={{ alignSelf:m.role==='user'?'flex-end':'flex-start', maxWidth:'92%', background:m.role==='user'?'var(--orange-dim)':'var(--bg-3)', color:m.role==='user'?'var(--orange)':'var(--txt)', padding:'9px 13px', borderRadius:m.role==='user'?'10px 10px 3px 10px':'3px 10px 10px 10px', fontSize:12, lineHeight:1.6, whiteSpace:'pre-wrap', border:`1px solid ${m.role==='user'?'rgba(255,79,17,0.3)':'var(--border)'}`, fontFamily:'var(--font-body)', fontWeight:m.role==='user'?500:400 }}>{m.text}</div>
+          <div key={i} style={{ alignSelf:m.role==='user'?'flex-end':'flex-start', maxWidth:'92%', background:m.role==='user'?'var(--orange-dim)':'var(--bg-3)', color:m.role==='user'?'var(--orange)':'var(--txt)', padding:'10px 14px', borderRadius:m.role==='user'?'12px 12px 4px 12px':'4px 12px 12px 12px', fontSize:12, lineHeight:1.6, whiteSpace:'pre-wrap', fontFamily:'var(--font-body)', fontWeight:m.role==='user'?500:400 }}>{m.text}</div>
         ))}
-        {loading && <div style={{ alignSelf:'flex-start', background:'var(--bg-3)', padding:'9px 14px', borderRadius:'3px 10px 10px 10px', fontSize:11, color:'var(--txt-3)', fontFamily:'var(--font-body)', border:'1px solid var(--border)', animation:'pulse 1.5s infinite' }}>Analisando…</div>}
+        {loading && <div style={{ alignSelf:'flex-start', background:'var(--bg-3)', padding:'10px 14px', borderRadius:'4px 12px 12px 12px', fontSize:11, color:'var(--txt-3)', fontFamily:'var(--font-body)', animation:'pulse 1.5s infinite' }}>Analisando…</div>}
         <div ref={bottomRef} />
       </div>
 
       <div style={{ padding:'8px 12px', display:'flex', flexWrap:'wrap', gap:5, borderTop:'1px solid var(--border)', flexShrink:0 }}>
-        {quickPrompts.map(q=><button key={q} onClick={()=>send(q)} disabled={loading} style={{ fontSize:10, padding:'4px 10px', border:'1px solid var(--border-2)', borderRadius:4, cursor:'pointer', background:'transparent', fontFamily:'var(--font-body)', fontWeight:400, color:'var(--txt-3)', transition:'all .15s' }} onMouseEnter={e=>{e.currentTarget.style.borderColor='var(--orange)';e.currentTarget.style.color='var(--orange)'}} onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--border-2)';e.currentTarget.style.color='var(--txt-3)'}}>{q}</button>)}
+        {quickPrompts.map(q=><button key={q} onClick={()=>send(q)} disabled={loading} style={{ fontSize:10, padding:'5px 10px', border:'none', borderRadius:6, cursor:'pointer', background:'var(--bg-3)', fontFamily:'var(--font-body)', fontWeight:400, color:'var(--txt-3)', transition:'all .15s' }} onMouseEnter={e=>{e.currentTarget.style.background='var(--bg-4)';e.currentTarget.style.color='var(--orange)'}} onMouseLeave={e=>{e.currentTarget.style.background='var(--bg-3)';e.currentTarget.style.color='var(--txt-3)'}}>{q}</button>)}
       </div>
 
-      <div style={{ padding:'8px 12px', borderTop:'1px solid var(--border)', display:'flex', gap:6, flexShrink:0 }}>
-        <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&send(input)} placeholder="Pergunte sobre a startup…" style={{ flex:1, padding:'8px 12px', fontSize:12, border:'1px solid var(--border-2)', borderRadius:6, background:'var(--bg-3)', color:'var(--txt)', fontFamily:'var(--font-body)', fontWeight:400, outline:'none', transition:'border-color .15s' }} onFocus={e=>e.target.style.borderColor='var(--orange)'} onBlur={e=>e.target.style.borderColor='var(--border-2)'} />
-        <button onClick={()=>send(input)} disabled={loading} style={{ padding:'8px 18px', fontSize:11, fontWeight:600, background:'var(--orange)', color:'var(--bg)', border:'none', borderRadius:6, cursor:loading?'not-allowed':'pointer', fontFamily:'var(--font-body)', opacity:loading?.5:1, boxShadow:'0 0 10px var(--orange-glow)' }}>Enviar</button>
+      <div style={{ padding:'10px 12px', borderTop:'1px solid var(--border)', display:'flex', gap:6, flexShrink:0 }}>
+        <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&send(input)} placeholder="Pergunte sobre a startup…" style={{ flex:1, padding:'9px 14px', fontSize:12, border:'1px solid var(--border)', borderRadius:8, background:'var(--bg-3)', color:'var(--txt)', fontFamily:'var(--font-body)', fontWeight:400, outline:'none', transition:'border-color .15s' }} onFocus={e=>e.target.style.borderColor='var(--orange)'} onBlur={e=>e.target.style.borderColor='var(--border)'} />
+        <button onClick={()=>send(input)} disabled={loading} style={{ padding:'9px 18px', fontSize:11, fontWeight:600, background:'var(--orange)', color:'#fff', border:'none', borderRadius:8, cursor:loading?'not-allowed':'pointer', fontFamily:'var(--font-body)', opacity:loading?.5:1 }}>Enviar</button>
       </div>
     </div>
   )
