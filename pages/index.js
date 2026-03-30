@@ -5,6 +5,9 @@ import DetailPanel from '../components/DetailPanel'
 import Copilot from '../components/Copilot'
 import Dashboard from '../components/Dashboard'
 import Analytics from '../components/Analytics'
+import HojeView from '../components/HojeView'
+import EncountersView from '../components/EncountersView'
+import StartupsView from '../components/StartupsView'
 import { useCSData } from '../lib/helpers'
 import { CURRENT_SPRINT } from '../lib/constants'
 
@@ -13,7 +16,7 @@ export default function Home() {
   const [loading, setLoading]     = useState(true)
   const [error, setError]         = useState(null)
   const [selected, setSelected]   = useState(null)
-  const [view, setView]           = useState('dashboard')
+  const [view, setView]           = useState('hoje')
   const [copilotOpen, setCopilot] = useState(false)
   const [syncing, setSyncing]     = useState(false)
   const { getCS, patchCS }        = useCSData()
@@ -32,15 +35,21 @@ export default function Home() {
   async function sync() { setSyncing(true); await loadData(); setSyncing(false) }
   function selectStartup(s) { setSelected(s); setView('startup') }
 
-  const topTitle = {
-    dashboard: 'START Primeiras Vendas 2026',
+  const titles = {
+    hoje: 'Hoje',
+    encontros: 'Encontros',
+    'startups-table': 'Startups',
+    dashboard: 'Dashboard',
     analytics: 'Análise Detalhada',
     startup: selected?.nome || 'Startup',
   }
-  const topSub = {
-    dashboard: `${startups.length} startups · Sprint ${CURRENT_SPRINT.n}: ${CURRENT_SPRINT.tema}`,
-    analytics: 'Distribuição · Rankings · Segmentos · Regiões',
-    startup: selected ? `${selected.founder_nome} · ${selected.founder_email}` : '',
+  const subtitles = {
+    hoje: `Sprint ${CURRENT_SPRINT.n}: ${CURRENT_SPRINT.tema}`,
+    encontros: 'Presença por evento',
+    'startups-table': `${startups.length} startups · Sprint ${CURRENT_SPRINT.n}`,
+    dashboard: `${startups.length} startups · Métricas gerais`,
+    analytics: 'Distribuição · Rankings · Segmentos',
+    startup: selected ? `${selected.founder_nome} · ${selected.nome_gt||''}` : '',
   }
 
   return (
@@ -64,10 +73,10 @@ export default function Home() {
         <main style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', height:'100vh', overflow:'hidden' }}>
 
           {/* topbar */}
-          <div style={{ background:'var(--bg-2)', borderBottom:'1px solid var(--border)', padding:'0 24px', height:54, display:'flex', alignItems:'center', gap:12, flexShrink:0 }}>
+          <div style={{ background:'var(--bg-2)', borderBottom:'1px solid var(--border)', padding:'0 24px', height:52, display:'flex', alignItems:'center', gap:12, flexShrink:0 }}>
             <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontFamily:'var(--font-body)', fontSize:15, fontWeight:700, letterSpacing:'-0.2px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', color:'var(--txt)' }}>{topTitle[view]}</div>
-              <div style={{ fontSize:11, color:'var(--txt-3)', marginTop:1, fontFamily:'var(--font-body)', fontWeight:400 }}>{topSub[view]}</div>
+              <div style={{ fontFamily:'var(--font-body)', fontSize:15, fontWeight:700, letterSpacing:'-0.2px', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', color:'var(--txt)' }}>{titles[view]}</div>
+              <div style={{ fontSize:11, color:'var(--txt-3)', marginTop:1, fontFamily:'var(--font-body)', fontWeight:400 }}>{subtitles[view]}</div>
             </div>
 
             <button onClick={sync} disabled={syncing} style={{ padding:'7px 14px', fontSize:11, fontWeight:500, border:'none', borderRadius:8, cursor:syncing?'not-allowed':'pointer', background:'var(--bg-3)', fontFamily:'var(--font-body)', color:'var(--txt-3)', display:'flex', alignItems:'center', gap:6, opacity:syncing?.6:1, flexShrink:0, transition:'all .15s' }}
@@ -93,18 +102,42 @@ export default function Home() {
           {error && <div style={{ margin:'10px 24px 0', background:'var(--red-dim)', border:'1px solid rgba(239,68,68,0.15)', borderRadius:10, padding:'10px 16px', fontSize:11, color:'var(--red)', flexShrink:0, fontFamily:'var(--font-body)', fontWeight:500 }}>Erro ao carregar dados: {error}</div>}
 
           <div style={{ flex:1, overflow:'hidden', padding:'14px 24px 0', display:'flex', gap:12, minHeight:0 }}>
+
+            {view==='hoje' && (
+              <>
+                <HojeView startups={startups} getCS={getCS} onSelectStartup={selectStartup} />
+                {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} /></div>}
+              </>
+            )}
+
+            {view==='encontros' && (
+              <>
+                <EncountersView startups={startups} getCS={getCS} onSelectStartup={selectStartup} />
+                {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} /></div>}
+              </>
+            )}
+
+            {view==='startups-table' && (
+              <>
+                <StartupsView startups={startups} getCS={getCS} onSelectStartup={selectStartup} />
+                {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} /></div>}
+              </>
+            )}
+
             {view==='dashboard' && (
               <>
                 <Dashboard startups={startups} onSelectStartup={selectStartup} />
                 {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} /></div>}
               </>
             )}
+
             {view==='analytics' && (
               <>
                 <Analytics startups={startups} onSelectStartup={selectStartup} />
                 {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} /></div>}
               </>
             )}
+
             {view==='startup' && (
               <div style={{ flex:1, display:'grid', gridTemplateColumns:copilotOpen?'1fr 300px':'1fr', gap:12, minHeight:0, overflow:'hidden', paddingBottom:14 }}>
                 <DetailPanel startup={selected} cs={selected?getCS(selected.startup_id):null} patchCS={patchCS} />
