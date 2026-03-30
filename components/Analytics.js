@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { programMetrics, pct, preseazncaRate, autoRiskLevel } from '../lib/metrics'
+import { programMetrics, pct, presencaRate } from '../lib/metrics'
 import { ini } from '../lib/helpers'
 
 const card = { background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:10, padding:'18px 20px' }
