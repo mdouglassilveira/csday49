@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { programMetrics, pct, autoRiskLevel, DONE_SPRINTS } from '../lib/metrics'
+import { programMetrics, pct, autoRiskLevel } from '../lib/metrics'
 
 const card = { background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:12, padding:'20px' }
 const sTitle = { fontFamily:'var(--font-body)', fontSize:10, fontWeight:600, color:'var(--txt-3)', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:14 }
@@ -90,7 +90,7 @@ function SprintChart({ data, total }) {
   )
 }
 
-export default function Dashboard({ startups, onSelectStartup }) {
+export default function Dashboard({ startups, onSelectStartup, cal }) {
   const m = useMemo(()=>programMetrics(startups),[startups])
   if (!startups.length) return <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--txt-3)', fontSize:12, fontFamily:'var(--font-body)' }}>Carregando…</div>
 
@@ -99,7 +99,7 @@ export default function Dashboard({ startups, onSelectStartup }) {
       <AlertStrip startups={startups} onSelect={onSelectStartup} />
 
       <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10, marginBottom:10 }}>
-        <MetCard label="TOTAL DE STARTUPS"  value={m.total}                  sub={`${DONE_SPRINTS.length} sprints realizados`} />
+        <MetCard label="TOTAL DE STARTUPS"  value={m.total}                  sub={`${cal?.doneSprints?.length||0} sprints realizados`} />
         <MetCard label="PRESENÇA MÉDIA"      value={`${pct(m.avgPresenca)}%`} sub="workshop + mentoria"          color={pct(m.avgPresenca)>=70?'var(--green)':'var(--orange)'} accent />
         <MetCard label="SEM PRESENÇA"        value={m.riskMap.critico||0}     sub="nunca participaram"            color={(m.riskMap.critico||0)>5?'var(--red)':'var(--txt-2)'} accent={(m.riskMap.critico||0)>5} />
         <MetCard label="ENGAJADAS"           value={m.riskMap.engajado||0}    sub="+80% de presença"             color="var(--green)" accent />

@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { calcHS, presencaDone } from '../lib/helpers'
-import { SPRINTS, CURRENT_SPRINT, firstName } from '../lib/constants'
+import { firstName } from '../lib/constants'
 
-export default function Copilot({ startup, cs, getCS, allStartups }) {
+export default function Copilot({ startup, cs, getCS, allStartups, cal }) {
   const [messages, setMessages] = useState([{ role:'assistant', text:'Olá, Tamara! Selecione uma startup e pergunte o que quiser — presença, risco de churn, próxima ação ou visão geral do programa.' }])
   const [input, setInput]       = useState('')
   const [loading, setLoading]   = useState(false)
@@ -11,11 +11,14 @@ export default function Copilot({ startup, cs, getCS, allStartups }) {
   useEffect(()=>{ bottomRef.current?.scrollIntoView({behavior:'smooth'}) },[messages])
 
   function buildSystem() {
+    const sprints = cal?.sprints || []
+    const currentSp = cal?.currentSprint
+    const doneSprints = cal?.doneSprints || []
     const criticos = allStartups.filter(s=>{ const {attended}=presencaDone(s); return attended===0 }).length
-    const base = `Você é o Copilot de CS da 49 Educação, assistindo Tamara Moraes no START Primeiras Vendas 2026. 10 Sprints: Workshop terça 10h + Mentoria quinta 10h. 150 startups em GT1/GT2/GT3. Sprint atual: ${CURRENT_SPRINT.n} — ${CURRENT_SPRINT.tema}. Total: ${allStartups.length} startups · ${criticos} sem presença. Responda em português, conciso e acionável.`
+    const base = `Você é o Copilot de CS da 49 Educação, assistindo Tamara Moraes no START Primeiras Vendas 2026. ${sprints.length} Sprints: Workshop terça 10h + Mentoria quinta 10h. 150 startups em GT1/GT2/GT3. Sprint atual: ${currentSp?.n||'?'} — ${currentSp?.tema||'?'}. Total: ${allStartups.length} startups · ${criticos} sem presença. Responda em português, conciso e acionável.`
     if (!startup) return base
     const { attended, total } = presencaDone(startup)
-    const detail = SPRINTS.filter(x=>x.status!=='fut').map(sp=>`S${sp.n}:W${startup[`workshop${sp.n}`]?'✓':'✗'}M${startup[`mentoria${sp.n}`]?'✓':'✗'}A${startup[`sprint_${sp.n}`]?'✓':'✗'}`).join(' ')
+    const detail = doneSprints.map(sp=>`S${sp.n}:W${startup[`workshop${sp.n}`]?'✓':'✗'}M${startup[`mentoria${sp.n}`]?'✓':'✗'}A${startup[`sprint_${sp.n}`]?'✓':'✗'}`).join(' ')
     return `${base}\n\nStartup: ${startup.nome} | ${startup.founder_nome}\nGrupo: ${startup.nome_gt} | Mentor: ${startup.nome_mentor} | Região: ${startup.escritorio_regional}\nHealth: ${calcHS(startup,cs)}/100 | Status: ${cs?.status||'ativo'} | Presença: ${attended}/${total}\n${detail}\nAnotações: ${cs?.notes||'nenhuma'} | Último contato: ${cs?.lastContact||'não registrado'}`
   }
 

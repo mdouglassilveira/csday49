@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import { SPRINTS, CURRENT_SPRINT, getCurrentEvent, firstName } from '../lib/constants'
-import { autoRiskLevel, getEventAttendance, getStartupsNeedingFollowup, DONE_SPRINTS, pct, presencaRate, encontrosPresente } from '../lib/metrics'
+import { firstName } from '../lib/constants'
+import { autoRiskLevel, getEventAttendance, getStartupsNeedingFollowup, pct, encontrosPresente } from '../lib/metrics'
 import { daysSince, calcHS, ini } from '../lib/helpers'
 
 const card = { background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:12, padding:'20px' }
@@ -24,11 +24,12 @@ function ActionRow({ s, cs, label, color, onClick }) {
   )
 }
 
-export default function HojeView({ startups, getCS, onSelectStartup }) {
-  const event = useMemo(() => getCurrentEvent(), [])
+export default function HojeView({ startups, getCS, onSelectStartup, cal }) {
+  const event = cal.currentEvent
   const attendance = useMemo(() => {
     if (!event) return null
-    return getEventAttendance(startups, event.sprint.n, event.type)
+    const tipo = event.tipo === 'Workshop' ? 'workshop' : event.tipo === 'Mentoria' ? 'mentoria' : 'atividade'
+    return getEventAttendance(startups, event.sprint, tipo)
   }, [startups, event])
 
   const needFollowup = useMemo(() => getStartupsNeedingFollowup(startups, getCS, 7), [startups, getCS])
@@ -36,10 +37,11 @@ export default function HojeView({ startups, getCS, onSelectStartup }) {
   const recentRisk = useMemo(() => startups.filter(s => autoRiskLevel(s) === 'atencao'), [startups])
   const criticos = useMemo(() => startups.filter(s => autoRiskLevel(s) === 'critico'), [startups])
 
-  if (!startups.length) return <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--txt-3)', fontSize:12, fontFamily:'var(--font-body)' }}>Carregando…</div>
+  if (!startups.length || !cal.loaded) return <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--txt-3)', fontSize:12, fontFamily:'var(--font-body)' }}>Carregando…</div>
 
-  const eventLabel = event?.type === 'workshop' ? 'Workshop' : 'Mentoria'
-  const eventDate = event?.date ? event.date.toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'short' }) : ''
+  const eventLabel = event?.tipo || 'Workshop'
+  const eventDate = event?.data ? event.data.toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'short' }) : ''
+  const sprintObj = cal.sprints.find(s => s.n === event?.sprint)
 
   return (
     <div style={{ flex:1, overflowY:'auto', paddingBottom:24 }}>
@@ -48,13 +50,14 @@ export default function HojeView({ startups, getCS, onSelectStartup }) {
       <div style={{ ...card, marginBottom:10, borderLeft:'3px solid var(--orange)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
         <div>
           <div style={{ fontSize:10, color:'var(--txt-3)', fontFamily:'var(--font-body)', fontWeight:600, letterSpacing:'.06em', textTransform:'uppercase', marginBottom:4 }}>
-            {event?.sprint?.status === 'now' ? 'Sprint atual' : 'Último encontro'}
+            {sprintObj?.status === 'now' ? 'Sprint atual' : 'Último encontro'}
           </div>
           <div style={{ fontSize:18, fontWeight:700, color:'var(--txt)', fontFamily:'var(--font-body)', letterSpacing:'-0.3px' }}>
-            Sprint {event?.sprint?.n} — {eventLabel}
+            Sprint {event?.sprint} — {eventLabel}
           </div>
           <div style={{ fontSize:12, color:'var(--txt-3)', fontFamily:'var(--font-body)', fontWeight:400, marginTop:2 }}>
-            {event?.sprint?.tema} · {eventDate}
+            {event?.nome} · {eventDate}
+            {event?.linkGravacao && <a href={event.linkGravacao} target="_blank" rel="noreferrer" style={{ color:'var(--orange)', marginLeft:8, textDecoration:'none' }}>Gravação →</a>}
           </div>
         </div>
         {attendance && (
@@ -86,7 +89,7 @@ export default function HojeView({ startups, getCS, onSelectStartup }) {
           {/* Absent */}
           <div style={{ ...card }}>
             <div style={{ ...sTitle, color:'var(--red)', display:'flex', justifyContent:'space-between' }}>
-              <span>Ausentes — {eventLabel} S{event.sprint.n}</span>
+              <span>Ausentes — {eventLabel} S{event.sprint}</span>
               <span style={{ fontFamily:'var(--font-mono)' }}>{attendance.absent.length}</span>
             </div>
             <div style={{ maxHeight:220, overflowY:'auto' }}>
@@ -99,7 +102,7 @@ export default function HojeView({ startups, getCS, onSelectStartup }) {
           {/* Present */}
           <div style={{ ...card }}>
             <div style={{ ...sTitle, color:'var(--green)', display:'flex', justifyContent:'space-between' }}>
-              <span>Presentes — {eventLabel} S{event.sprint.n}</span>
+              <span>Presentes — {eventLabel} S{event.sprint}</span>
               <span style={{ fontFamily:'var(--font-mono)' }}>{attendance.present.length}</span>
             </div>
             <div style={{ maxHeight:220, overflowY:'auto' }}>
@@ -132,14 +135,21 @@ export default function HojeView({ startups, getCS, onSelectStartup }) {
       <div style={{ ...card, marginTop:10 }}>
         <div style={sTitle}>Progresso do programa</div>
         <div style={{ display:'flex', gap:6, alignItems:'center' }}>
-          {SPRINTS.map(sp=>(
+          {cal.sprints.map(sp=>(
             <div key={sp.n} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
               <div style={{ width:'100%', height:6, borderRadius:99, background:sp.status==='done'?'var(--green)':sp.status==='now'?'var(--orange)':'var(--bg-4)' }} />
               <span style={{ fontSize:9, color:sp.status==='now'?'var(--orange)':'var(--txt-3)', fontWeight:sp.status==='now'?700:400, fontFamily:'var(--font-body)' }}>S{sp.n}</span>
             </div>
           ))}
         </div>
-        <div style={{ fontSize:11, color:'var(--txt-3)', fontFamily:'var(--font-body)', marginTop:8 }}>Sprint {CURRENT_SPRINT.n} de 10 — {CURRENT_SPRINT.tema}</div>
+        <div style={{ fontSize:11, color:'var(--txt-3)', fontFamily:'var(--font-body)', marginTop:8 }}>
+          {cal.currentSprint ? `Sprint ${cal.currentSprint.n} de ${cal.sprints.length} — ${cal.currentSprint.tema}` : 'Carregando…'}
+          {cal.nextEvent && (
+            <span style={{ marginLeft:8, color:'var(--orange)' }}>
+              Próximo: {cal.nextEvent.tipo} {cal.nextEvent.data.toLocaleDateString('pt-BR', { weekday:'short', day:'2-digit', month:'2-digit' })}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   )

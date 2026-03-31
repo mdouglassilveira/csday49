@@ -1,12 +1,11 @@
 import { useState, useMemo } from 'react'
-import { DONE_SPRINTS } from '../lib/metrics'
 import { calcHS, daysSince, ini } from '../lib/helpers'
 import { autoRiskLevel, workshopRate, mentoriaRate, pct } from '../lib/metrics'
 import BulkSendModal from './BulkSendModal'
 
 const card = { background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:12 }
 
-export default function StartupsView({ startups, getCS, onSelectStartup, onStartBatch }) {
+export default function StartupsView({ startups, getCS, onSelectStartup, onStartBatch, cal }) {
   const [sortBy, setSortBy] = useState('hs')
   const [sortDir, setSortDir] = useState('asc')
   const [gtFilter, setGtFilter] = useState('todos')
@@ -15,7 +14,7 @@ export default function StartupsView({ startups, getCS, onSelectStartup, onStart
   const [showBulkSend, setShowBulkSend] = useState(false)
   const [query, setQuery] = useState('')
 
-  const done = DONE_SPRINTS.length
+  const done = cal?.doneSprints?.length || 0
 
   const rows = useMemo(() => {
     let list = [...startups]

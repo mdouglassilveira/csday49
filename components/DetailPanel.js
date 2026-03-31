@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { calcHS, ini } from '../lib/helpers'
-import { SPRINTS, FUP_TEMPLATES, firstName } from '../lib/constants'
+import { FUP_TEMPLATES, firstName } from '../lib/constants'
 
 const card = { background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:12 }
 const sTitle = { fontFamily:'var(--font-body)', fontSize:10, fontWeight:600, color:'var(--txt-3)', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:12 }
@@ -55,8 +55,9 @@ function TabPerfil({ s }) {
   )
 }
 
-function TabPresenca({ s }) {
-  const done = SPRINTS.filter(x=>x.status!=='fut')
+function TabPresenca({ s, sprints }) {
+  const allSprints = sprints || []
+  const done = allSprints.filter(x=>x.status!=='fut')
   const wkP  = done.filter(sp=>s[`workshop${sp.n}`]).length
   const mtP  = done.filter(sp=>s[`mentoria${sp.n}`]).length
   const atP  = done.filter(sp=>s[`sprint_${sp.n}`]).length
@@ -77,7 +78,7 @@ function TabPresenca({ s }) {
       </div>
       <div style={sTitle}>detalhamento por sprint</div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:6 }}>
-        {SPRINTS.map(sp=>{
+        {allSprints.map(sp=>{
           const wkOk = s[`workshop${sp.n}`]
           const mtOk = s[`mentoria${sp.n}`]
           const atOk = s[`sprint_${sp.n}`]
@@ -438,7 +439,7 @@ function TabMensagens({ s }) {
   )
 }
 
-export default function DetailPanel({ startup, cs, patchCS }) {
+export default function DetailPanel({ startup, cs, patchCS, cal }) {
   const [tab, setTab] = useState('Perfil')
   if (!startup) {
     return (
@@ -473,7 +474,7 @@ export default function DetailPanel({ startup, cs, patchCS }) {
       <TabBar active={tab} onChange={setTab} />
       <div style={{ flex:1, overflowY:tab==='Mensagens'?'hidden':'auto', padding:'18px 20px', display:'flex', flexDirection:'column', minHeight:0 }}>
         {tab==='Perfil'    && <TabPerfil    s={startup} />}
-        {tab==='Presença'  && <TabPresenca  s={startup} />}
+        {tab==='Presença'  && <TabPresenca  s={startup} sprints={cal?.sprints} />}
         {tab==='Follow-up' && <TabFollowup  s={startup} cs={cs} patchCS={patchCS} />}
         {tab==='Mensagens' && <TabMensagens s={startup} />}
       </div>

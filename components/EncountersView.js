@@ -1,14 +1,13 @@
 import { useState, useMemo } from 'react'
-import { SPRINTS } from '../lib/constants'
-import { getEventAttendance, pct, DONE_SPRINTS } from '../lib/metrics'
+import { getEventAttendance, pct } from '../lib/metrics'
 import { calcHS, ini } from '../lib/helpers'
 import BulkSendModal from './BulkSendModal'
 
 const card = { background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:12, padding:'20px' }
 const sTitle = { fontFamily:'var(--font-body)', fontSize:10, fontWeight:600, color:'var(--txt-3)', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:12 }
 
-export default function EncountersView({ startups, getCS, onSelectStartup, onStartBatch }) {
-  const [sprintN, setSprintN] = useState(DONE_SPRINTS.length > 0 ? DONE_SPRINTS[DONE_SPRINTS.length-1].n : 1)
+export default function EncountersView({ startups, getCS, onSelectStartup, onStartBatch, cal }) {
+  const [sprintN, setSprintN] = useState(() => cal.doneSprints.length > 0 ? cal.doneSprints[cal.doneSprints.length-1].n : 1)
   const [eventType, setEventType] = useState('workshop')
   const [filterStatus, setFilterStatus] = useState('todos')
   const [gtFilter, setGtFilter] = useState('todos')
@@ -18,7 +17,7 @@ export default function EncountersView({ startups, getCS, onSelectStartup, onSta
 
   const attendance = useMemo(() => getEventAttendance(startups, sprintN, eventType), [startups, sprintN, eventType])
 
-  const sprint = SPRINTS.find(s=>s.n===sprintN)
+  const sprint = cal.sprints.find(s=>s.n===sprintN)
 
   // Filter and sort
   const rows = useMemo(() => {
@@ -78,7 +77,7 @@ export default function EncountersView({ startups, getCS, onSelectStartup, onSta
       {/* Sprint selector */}
       <div style={{ ...card, marginBottom:10, padding:'16px 20px' }}>
         <div style={{ display:'flex', gap:6, marginBottom:12 }}>
-          {SPRINTS.map(sp=>(
+          {cal.sprints.map(sp=>(
             <button key={sp.n} onClick={()=>setSprintN(sp.n)} style={{
               flex:1, padding:'8px 0', fontSize:11, fontWeight:sprintN===sp.n?700:500, border:'none', borderRadius:8, cursor:'pointer',
               background:sprintN===sp.n?'var(--orange-dim)':sp.status==='fut'?'transparent':'var(--bg-3)',
@@ -98,7 +97,10 @@ export default function EncountersView({ startups, getCS, onSelectStartup, onSta
 
           {/* Info */}
           <div style={{ fontSize:11, color:'var(--txt-3)', fontFamily:'var(--font-body)' }}>
-            {sprint?.tema} · {eventType==='workshop'?sprint?.wk:sprint?.mt}
+            {sprint?.tema} · {eventType==='workshop'?sprint?.wk:eventType==='mentoria'?sprint?.mt:sprint?.wk}
+            {sprint && (eventType==='workshop'?sprint.workshop:sprint.mentoria_event)?.linkGravacao && (
+              <a href={(eventType==='workshop'?sprint.workshop:sprint.mentoria_event).linkGravacao} target="_blank" rel="noreferrer" style={{ color:'var(--orange)', marginLeft:8, textDecoration:'none', fontSize:10 }}>Gravação →</a>
+            )}
           </div>
         </div>
       </div>

@@ -11,7 +11,7 @@ import StartupsView from '../components/StartupsView'
 import QueueIndicator from '../components/QueueIndicator'
 import { useCSData } from '../lib/helpers'
 import { useQueue } from '../lib/useQueue'
-import { CURRENT_SPRINT } from '../lib/constants'
+import { useCalendario } from '../lib/useCalendario'
 
 export default function Home() {
   const [startups, setStartups]   = useState([])
@@ -24,6 +24,7 @@ export default function Home() {
   const [syncing, setSyncing]     = useState(false)
   const { getCS, patchCS }        = useCSData()
   const { activeBatch, startBatch, cancelBatch, dismissBatch } = useQueue()
+  const cal = useCalendario()
 
   async function loadData() {
     try {
@@ -40,6 +41,8 @@ export default function Home() {
   function selectStartup(s) { setSelected(s); setPrevView(view); setView('startup') }
   function goBack() { setView(prevView) }
 
+  const spLabel = cal.currentSprint ? `Sprint ${cal.currentSprint.n}: ${cal.currentSprint.tema}` : 'Carregando…'
+
   const titles = {
     hoje: 'Hoje',
     encontros: 'Encontros',
@@ -49,9 +52,9 @@ export default function Home() {
     startup: selected?.nome || 'Startup',
   }
   const subtitles = {
-    hoje: `Sprint ${CURRENT_SPRINT.n}: ${CURRENT_SPRINT.tema}`,
+    hoje: spLabel,
     encontros: 'Presença por evento',
-    'startups-table': `${startups.length} startups · Sprint ${CURRENT_SPRINT.n}`,
+    'startups-table': `${startups.length} startups · ${spLabel}`,
     dashboard: `${startups.length} startups · Métricas gerais`,
     analytics: 'Distribuição · Rankings · Segmentos',
     startup: selected ? `${selected.founder_nome} · ${selected.nome_gt||''}` : '',
@@ -128,43 +131,43 @@ export default function Home() {
 
             {view==='hoje' && (
               <>
-                <HojeView startups={startups} getCS={getCS} onSelectStartup={selectStartup} />
-                {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} /></div>}
+                <HojeView startups={startups} getCS={getCS} onSelectStartup={selectStartup} cal={cal} />
+                {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} cal={cal} /></div>}
               </>
             )}
 
             {view==='encontros' && (
               <>
-                <EncountersView startups={startups} getCS={getCS} onSelectStartup={selectStartup} onStartBatch={startBatch} />
-                {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} /></div>}
+                <EncountersView startups={startups} getCS={getCS} onSelectStartup={selectStartup} onStartBatch={startBatch} cal={cal} />
+                {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} cal={cal} /></div>}
               </>
             )}
 
             {view==='startups-table' && (
               <>
-                <StartupsView startups={startups} getCS={getCS} onSelectStartup={selectStartup} onStartBatch={startBatch} />
-                {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} /></div>}
+                <StartupsView startups={startups} getCS={getCS} onSelectStartup={selectStartup} onStartBatch={startBatch} cal={cal} />
+                {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} cal={cal} /></div>}
               </>
             )}
 
             {view==='dashboard' && (
               <>
-                <Dashboard startups={startups} onSelectStartup={selectStartup} />
-                {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} /></div>}
+                <Dashboard startups={startups} onSelectStartup={selectStartup} cal={cal} />
+                {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} cal={cal} /></div>}
               </>
             )}
 
             {view==='analytics' && (
               <>
-                <Analytics startups={startups} onSelectStartup={selectStartup} />
-                {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} /></div>}
+                <Analytics startups={startups} onSelectStartup={selectStartup} cal={cal} />
+                {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} cal={cal} /></div>}
               </>
             )}
 
             {view==='startup' && (
               <div style={{ flex:1, display:'grid', gridTemplateColumns:copilotOpen?'1fr 300px':'1fr', gap:12, minHeight:0, overflow:'hidden', paddingBottom:14 }}>
-                <DetailPanel startup={selected} cs={selected?getCS(selected.startup_id):null} patchCS={patchCS} />
-                {copilotOpen && <Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} />}
+                <DetailPanel startup={selected} cs={selected?getCS(selected.startup_id):null} patchCS={patchCS} cal={cal} />
+                {copilotOpen && <Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} cal={cal} />}
               </div>
             )}
           </div>
