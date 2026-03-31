@@ -7,7 +7,7 @@ import BulkSendModal from './BulkSendModal'
 const card = { background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:12, padding:'20px' }
 const sTitle = { fontFamily:'var(--font-body)', fontSize:10, fontWeight:600, color:'var(--txt-3)', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:12 }
 
-export default function EncountersView({ startups, getCS, onSelectStartup }) {
+export default function EncountersView({ startups, getCS, onSelectStartup, onStartBatch }) {
   const [sprintN, setSprintN] = useState(DONE_SPRINTS.length > 0 ? DONE_SPRINTS[DONE_SPRINTS.length-1].n : 1)
   const [eventType, setEventType] = useState('workshop')
   const [filterStatus, setFilterStatus] = useState('todos')
@@ -73,7 +73,7 @@ export default function EncountersView({ startups, getCS, onSelectStartup }) {
 
   return (
     <div style={{ flex:1, overflowY:'auto', paddingBottom:24 }}>
-      {showBulkSend && <BulkSendModal recipients={getBulkRecipients()} onClose={() => { setShowBulkSend(false); setSelected(new Set()) }} />}
+      {showBulkSend && <BulkSendModal recipients={getBulkRecipients()} onClose={() => { setShowBulkSend(false); setSelected(new Set()) }} onStartSend={(items, text, name) => onStartBatch(items, text, name)} />}
 
       {/* Sprint selector */}
       <div style={{ ...card, marginBottom:10, padding:'16px 20px' }}>

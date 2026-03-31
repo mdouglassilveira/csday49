@@ -6,7 +6,7 @@ import BulkSendModal from './BulkSendModal'
 
 const card = { background:'var(--bg-2)', border:'1px solid var(--border)', borderRadius:12 }
 
-export default function StartupsView({ startups, getCS, onSelectStartup }) {
+export default function StartupsView({ startups, getCS, onSelectStartup, onStartBatch }) {
   const [sortBy, setSortBy] = useState('hs')
   const [sortDir, setSortDir] = useState('asc')
   const [gtFilter, setGtFilter] = useState('todos')
@@ -81,7 +81,7 @@ export default function StartupsView({ startups, getCS, onSelectStartup }) {
 
   return (
     <div style={{ flex:1, overflowY:'auto', paddingBottom:24 }}>
-      {showBulkSend && <BulkSendModal recipients={getBulkRecipients()} onClose={() => { setShowBulkSend(false); setSelected(new Set()) }} />}
+      {showBulkSend && <BulkSendModal recipients={getBulkRecipients()} onClose={() => { setShowBulkSend(false); setSelected(new Set()) }} onStartSend={(items, text, name) => onStartBatch(items, text, name)} />}
 
       {/* Selection bar */}
       {selected.size > 0 && (

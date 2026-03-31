@@ -8,7 +8,9 @@ import Analytics from '../components/Analytics'
 import HojeView from '../components/HojeView'
 import EncountersView from '../components/EncountersView'
 import StartupsView from '../components/StartupsView'
+import QueueIndicator from '../components/QueueIndicator'
 import { useCSData } from '../lib/helpers'
+import { useQueue } from '../lib/useQueue'
 import { CURRENT_SPRINT } from '../lib/constants'
 
 export default function Home() {
@@ -21,6 +23,7 @@ export default function Home() {
   const [copilotOpen, setCopilot] = useState(false)
   const [syncing, setSyncing]     = useState(false)
   const { getCS, patchCS }        = useCSData()
+  const { activeBatch, startBatch, cancelBatch, dismissBatch } = useQueue()
 
   async function loadData() {
     try {
@@ -108,6 +111,8 @@ export default function Home() {
               {syncing?'Sincronizando…':'Sincronizar'}
             </button>
 
+            <QueueIndicator batch={activeBatch} onCancel={cancelBatch} onDismiss={dismissBatch} />
+
             <button onClick={()=>setCopilot(o=>!o)} style={{ padding:'7px 14px', fontSize:11, fontWeight:500, border:'none', borderRadius:8, cursor:'pointer', background:copilotOpen?'var(--orange-dim)':'var(--bg-3)', fontFamily:'var(--font-body)', color:copilotOpen?'var(--orange)':'var(--txt-3)', display:'flex', alignItems:'center', gap:6, transition:'all .15s', flexShrink:0 }}>
               <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
                 <rect x=".5" y=".5" width="12" height="8.5" rx="1.5" stroke="currentColor" strokeWidth="1.1"/>
@@ -130,14 +135,14 @@ export default function Home() {
 
             {view==='encontros' && (
               <>
-                <EncountersView startups={startups} getCS={getCS} onSelectStartup={selectStartup} />
+                <EncountersView startups={startups} getCS={getCS} onSelectStartup={selectStartup} onStartBatch={startBatch} />
                 {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} /></div>}
               </>
             )}
 
             {view==='startups-table' && (
               <>
-                <StartupsView startups={startups} getCS={getCS} onSelectStartup={selectStartup} />
+                <StartupsView startups={startups} getCS={getCS} onSelectStartup={selectStartup} onStartBatch={startBatch} />
                 {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} /></div>}
               </>
             )}
