@@ -8,6 +8,7 @@ import Analytics from '../components/Analytics'
 import HojeView from '../components/HojeView'
 import EncountersView from '../components/EncountersView'
 import StartupsView from '../components/StartupsView'
+import ConversationsView from '../components/ConversationsView'
 import QueueIndicator from '../components/QueueIndicator'
 import { useCSData } from '../lib/helpers'
 import { useQueue } from '../lib/useQueue'
@@ -45,6 +46,7 @@ export default function Home() {
 
   const titles = {
     hoje: 'Hoje',
+    conversas: 'Conversas',
     encontros: 'Encontros',
     'startups-table': 'Startups',
     dashboard: 'Dashboard',
@@ -53,6 +55,7 @@ export default function Home() {
   }
   const subtitles = {
     hoje: spLabel,
+    conversas: 'WhatsApp · Mensagens',
     encontros: 'Presença por evento',
     'startups-table': `${startups.length} startups · ${spLabel}`,
     dashboard: `${startups.length} startups · Métricas gerais`,
@@ -76,7 +79,7 @@ export default function Home() {
       )}
 
       <div style={{ display:'flex', height:'100vh', overflow:'hidden', background:'var(--bg)' }}>
-        <Sidebar startups={startups} selected={selected} getCS={getCS} onSelect={selectStartup} activeView={view} onViewChange={setView} />
+        <Sidebar startups={startups} getCS={getCS} activeView={view} onViewChange={setView} />
 
         <main style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', height:'100vh', overflow:'hidden' }}>
 
@@ -134,6 +137,10 @@ export default function Home() {
                 <HojeView startups={startups} getCS={getCS} onSelectStartup={selectStartup} cal={cal} />
                 {copilotOpen && <div style={{ width:300, flexShrink:0, paddingBottom:14 }}><Copilot startup={selected} cs={selected?getCS(selected.startup_id):null} getCS={getCS} allStartups={startups} cal={cal} /></div>}
               </>
+            )}
+
+            {view==='conversas' && (
+              <ConversationsView startups={startups} />
             )}
 
             {view==='encontros' && (
