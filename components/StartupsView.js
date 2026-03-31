@@ -76,6 +76,38 @@ export default function StartupsView({ startups, getCS, onSelectStartup, onStart
     }))
   }
 
+  function exportCSV() {
+    const exportRows = rows.filter(s => selected.has(s.startup_id))
+    const headers = ['Startup','Founder','Email','Telefone','GT','Mentor','Segmento','Escritório','Health Score','Workshop %','Mentoria %','Status','Último Contato']
+    const csvRows = exportRows.map(s => {
+      const cs = getCS(s.startup_id)
+      const hs = calcHS(s, cs)
+      return [
+        `"${(s.nome||'').replace(/"/g,'""')}"`,
+        `"${(s.founder_nome||'').replace(/"/g,'""')}"`,
+        `"${s.founder_email||''}"`,
+        `"${s.founder_telefone||''}"`,
+        s.nome_gt||'',
+        `"${(s.nome_mentor||'').replace(/"/g,'""')}"`,
+        `"${(s.segmento||'').replace(/"/g,'""')}"`,
+        `"${(s.escritorio_regional||'').replace(/"/g,'""')}"`,
+        hs,
+        `${pct(workshopRate(s))}%`,
+        `${pct(mentoriaRate(s))}%`,
+        cs.status||'ativo',
+        cs.lastContact||'',
+      ].join(',')
+    })
+    const csv = '\uFEFF' + [headers.join(','), ...csvRows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `startups_${statusFilter}_${gtFilter}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   if (!startups.length) return <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--txt-3)', fontSize:12, fontFamily:'var(--font-body)' }}>Carregando…</div>
 
   return (
@@ -88,6 +120,10 @@ export default function StartupsView({ startups, getCS, onSelectStartup, onStart
           <span style={{ fontSize:12, fontWeight:600, color:'var(--orange)', fontFamily:'var(--font-body)' }}>{selected.size} selecionadas</span>
           <button onClick={selectNone} style={{ fontSize:10, padding:'4px 10px', border:'none', borderRadius:6, cursor:'pointer', background:'var(--bg-3)', color:'var(--txt-3)', fontFamily:'var(--font-body)' }}>Limpar</button>
           <div style={{ flex:1 }} />
+          <button onClick={exportCSV} style={{ fontSize:11, padding:'7px 16px', border:'none', borderRadius:8, cursor:'pointer', background:'var(--bg-3)', color:'var(--txt-2)', fontFamily:'var(--font-body)', fontWeight:600, display:'flex', alignItems:'center', gap:5 }}>
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v8M3 6l3.5 3.5L10 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/><path d="M1 11h11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
+            Exportar CSV
+          </button>
           <button onClick={() => setShowBulkSend(true)} style={{ fontSize:11, padding:'7px 16px', border:'none', borderRadius:8, cursor:'pointer', background:'var(--orange)', color:'#fff', fontFamily:'var(--font-body)', fontWeight:600 }}>
             Enviar mensagem para {selected.size}
           </button>
