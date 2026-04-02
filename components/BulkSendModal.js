@@ -75,7 +75,9 @@ export default function BulkSendModal({ recipients, onClose, onStartSend }) {
           )}
 
           <div style={{ fontSize:10, color:'var(--txt-3)', fontFamily:'var(--font-body)', marginBottom:12, lineHeight:1.5 }}>
-            Variáveis: <code style={{ background:'var(--bg-4)', padding:'1px 4px', borderRadius:3, fontSize:10 }}>{'{nome}'}</code> <code style={{ background:'var(--bg-4)', padding:'1px 4px', borderRadius:3, fontSize:10 }}>{'{startup}'}</code> <code style={{ background:'var(--bg-4)', padding:'1px 4px', borderRadius:3, fontSize:10 }}>{'{gt}'}</code> <code style={{ background:'var(--bg-4)', padding:'1px 4px', borderRadius:3, fontSize:10 }}>{'{mentor}'}</code>
+            Variáveis: {['{nome}','{startup}','{gt}','{mentor}','{link_meet}','{email}','{telefone}','{segmento}','{escritorio}'].map(v=>(
+              <code key={v} style={{ background:'var(--bg-4)', padding:'1px 5px', borderRadius:3, fontSize:10, marginRight:4, cursor:'pointer', display:'inline-block', marginBottom:2 }} onClick={()=>{ if(!selectedTpl) setCustomText(prev=>prev+v) }}>{v}</code>
+            ))}
           </div>
 
           {/* Preview */}
